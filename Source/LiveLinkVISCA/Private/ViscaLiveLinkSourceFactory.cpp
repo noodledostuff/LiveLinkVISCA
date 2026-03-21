@@ -12,7 +12,7 @@ FText UViscaLiveLinkSourceFactory::GetSourceDisplayName() const
 
 FText UViscaLiveLinkSourceFactory::GetSourceTooltip() const
 {
-	return LOCTEXT("SourceTooltip", "Create a VISCA-over-IP LiveLink source.");
+	return LOCTEXT("SourceTooltip", "Adds a Live Link source that listens for VISCA over IP and publishes Camera-role subjects.");
 }
 
 TSharedPtr<ILiveLinkSource> UViscaLiveLinkSourceFactory::CreateSource(const FString& ConnectionString) const

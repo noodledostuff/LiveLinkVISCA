@@ -8,12 +8,14 @@ struct FPropertyChangedEvent;
 #endif
 #include "ViscaLiveLinkSettings.generated.h"
 
-/** VISCA-over-IP transport: UDP is listen-only; TCP uses connection + ACK/reply semantics. */
+/** VISCA over IP transport mode. */
 UENUM(BlueprintType)
 enum class EViscaReceiverTransportMode : uint8
 {
-	UDP UMETA(DisplayName = "UDP (listen only)"),
-	TCP UMETA(DisplayName = "TCP (with ACK)")
+	/** Stateless datagram listener; no session or command replies. */
+	UDP UMETA(DisplayName = "UDP (Listen)"),
+	/** Connection-oriented; supports VISCA-over-IP ACK and reply traffic. */
+	TCP UMETA(DisplayName = "TCP (Session + Replies)")
 };
 
 USTRUCT(BlueprintType)
@@ -21,14 +23,15 @@ struct FViscaReceiverConfig
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "VISCA")
+	/** Name of the Live Link subject published for this receiver (shown in Live Link UI). */
+	UPROPERTY(EditAnywhere, Category = "VISCA Source", meta = (DisplayName = "Subject Name"))
 	FName CameraName;
 
-	/** Enter port as text (e.g. 52381). */
-	UPROPERTY(EditAnywhere, Category = "VISCA", meta = (DisplayName = "Port"))
+	/** TCP/UDP port this receiver binds to (default VISCA over IP: 52381). */
+	UPROPERTY(EditAnywhere, Category = "VISCA Source", meta = (DisplayName = "Listen Port"))
 	FString PortString = TEXT("52381");
 
-	UPROPERTY(EditAnywhere, Category = "VISCA", meta = (DisplayName = "Transport"))
+	UPROPERTY(EditAnywhere, Category = "VISCA Source", meta = (DisplayName = "Transport"))
 	EViscaReceiverTransportMode Transport = EViscaReceiverTransportMode::UDP;
 };
 
@@ -44,17 +47,18 @@ public:
 	TArray<FViscaReceiverConfig> Receivers;
 };
 
-UCLASS()
+UCLASS(meta = (DisplayName = "VISCA over IP Source Settings"))
 class LIVELINKVISCA_API UViscaLiveLinkSourceSettings : public ULiveLinkSourceSettings
 {
 	GENERATED_BODY()
 
 public:
-	/** Dropdown: All interfaces (0.0.0.0), loopback, and local adapter IPv4s. */
-	UPROPERTY(EditAnywhere, Category = "VISCA", meta = (GetOptions = "GetListenInterfaceOptions"))
+	/** Local IPv4 to bind, or 0.0.0.0 for all interfaces. */
+	UPROPERTY(EditAnywhere, Category = "VISCA Source", meta = (GetOptions = "GetListenInterfaceOptions", DisplayName = "Bind Address"))
 	FString ListenInterfaceIp = TEXT("0.0.0.0");
 
-	UPROPERTY(EditAnywhere, Category = "VISCA")
+	/** One Live Link subject per entry; each must use a unique port. */
+	UPROPERTY(EditAnywhere, Category = "VISCA Source", meta = (DisplayName = "Receivers"))
 	TArray<FViscaReceiverConfig> Receivers;
 
 	UFUNCTION()

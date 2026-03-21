@@ -18,7 +18,7 @@ PRAGMA_DISABLE_DEPRECATION_WARNINGS
 
 // ********** Begin ScriptStruct FViscaReceiverConfig **********************************************
 struct Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics;
-#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_22_GENERATED_BODY \
+#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_24_GENERATED_BODY \
 	friend struct ::Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics; \
 	LIVELINKVISCA_API static class UScriptStruct* StaticStruct();
 
@@ -27,14 +27,14 @@ struct FViscaReceiverConfig;
 // ********** End ScriptStruct FViscaReceiverConfig ************************************************
 
 // ********** Begin Class UViscaLiveLinkSourceSettings *********************************************
-#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_50_RPC_WRAPPERS_NO_PURE_DECLS \
+#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_53_RPC_WRAPPERS_NO_PURE_DECLS \
 	DECLARE_FUNCTION(execGetListenInterfaceOptions);
 
 
 struct Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics;
 LIVELINKVISCA_API UClass* Z_Construct_UClass_UViscaLiveLinkSourceSettings_NoRegister();
 
-#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_50_INCLASS_NO_PURE_DECLS \
+#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_53_INCLASS_NO_PURE_DECLS \
 private: \
 	static void StaticRegisterNativesUViscaLiveLinkSourceSettings(); \
 	friend struct ::Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics; \
@@ -45,7 +45,7 @@ public: \
 	DECLARE_SERIALIZER(UViscaLiveLinkSourceSettings)
 
 
-#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_50_ENHANCED_CONSTRUCTORS \
+#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_53_ENHANCED_CONSTRUCTORS \
 	/** Standard constructor, called after all reflected properties have been initialized */ \
 	NO_API UViscaLiveLinkSourceSettings(); \
 	/** Deleted move- and copy-constructors, should never be used */ \
@@ -57,13 +57,13 @@ public: \
 	NO_API virtual ~UViscaLiveLinkSourceSettings();
 
 
-#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_47_PROLOG
-#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_50_GENERATED_BODY \
+#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_50_PROLOG
+#define FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_53_GENERATED_BODY \
 PRAGMA_DISABLE_DEPRECATION_WARNINGS \
 public: \
-	FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_50_RPC_WRAPPERS_NO_PURE_DECLS \
-	FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_50_INCLASS_NO_PURE_DECLS \
-	FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_50_ENHANCED_CONSTRUCTORS \
+	FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_53_RPC_WRAPPERS_NO_PURE_DECLS \
+	FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_53_INCLASS_NO_PURE_DECLS \
+	FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h_53_ENHANCED_CONSTRUCTORS \
 private: \
 PRAGMA_ENABLE_DEPRECATION_WARNINGS
 

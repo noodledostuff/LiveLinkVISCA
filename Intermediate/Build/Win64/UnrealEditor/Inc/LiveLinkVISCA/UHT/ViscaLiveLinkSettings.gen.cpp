@@ -40,16 +40,20 @@ struct Z_Construct_UEnum_LiveLinkVISCA_EViscaReceiverTransportMode_Statics
 	static constexpr UECodeGen_Private::FMetaDataPairParam Enum_MetaDataParams[] = {
 		{ "BlueprintType", "true" },
 #if !UE_BUILD_SHIPPING
-		{ "Comment", "/** VISCA-over-IP transport: UDP is listen-only; TCP uses connection + ACK/reply semantics. */" },
+		{ "Comment", "/** VISCA over IP transport mode. */" },
 #endif
 		{ "ModuleRelativePath", "Public/ViscaLiveLinkSettings.h" },
-		{ "TCP.DisplayName", "TCP (with ACK)" },
+		{ "TCP.Comment", "/** Connection-oriented; supports VISCA-over-IP ACK and reply traffic. */" },
+		{ "TCP.DisplayName", "TCP (Session + Replies)" },
 		{ "TCP.Name", "EViscaReceiverTransportMode::TCP" },
+		{ "TCP.ToolTip", "Connection-oriented; supports VISCA-over-IP ACK and reply traffic." },
 #if !UE_BUILD_SHIPPING
-		{ "ToolTip", "VISCA-over-IP transport: UDP is listen-only; TCP uses connection + ACK/reply semantics." },
+		{ "ToolTip", "VISCA over IP transport mode." },
 #endif
-		{ "UDP.DisplayName", "UDP (listen only)" },
+		{ "UDP.Comment", "/** Stateless datagram listener; no session or command replies. */" },
+		{ "UDP.DisplayName", "UDP (Listen)" },
 		{ "UDP.Name", "EViscaReceiverTransportMode::UDP" },
+		{ "UDP.ToolTip", "Stateless datagram listener; no session or command replies." },
 	};
 #endif // WITH_METADATA
 	static constexpr UECodeGen_Private::FEnumeratorParam Enumerators[] = {
@@ -91,22 +95,29 @@ struct Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics
 		{ "ModuleRelativePath", "Public/ViscaLiveLinkSettings.h" },
 	};
 	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_CameraName_MetaData[] = {
-		{ "Category", "VISCA" },
+		{ "Category", "VISCA Source" },
+#if !UE_BUILD_SHIPPING
+		{ "Comment", "/** Name of the Live Link subject published for this receiver (shown in Live Link UI). */" },
+#endif
+		{ "DisplayName", "Subject Name" },
 		{ "ModuleRelativePath", "Public/ViscaLiveLinkSettings.h" },
+#if !UE_BUILD_SHIPPING
+		{ "ToolTip", "Name of the Live Link subject published for this receiver (shown in Live Link UI)." },
+#endif
 	};
 	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_PortString_MetaData[] = {
-		{ "Category", "VISCA" },
+		{ "Category", "VISCA Source" },
 #if !UE_BUILD_SHIPPING
-		{ "Comment", "/** Enter port as text (e.g. 52381). */" },
+		{ "Comment", "/** TCP/UDP port this receiver binds to (default VISCA over IP: 52381). */" },
 #endif
-		{ "DisplayName", "Port" },
+		{ "DisplayName", "Listen Port" },
 		{ "ModuleRelativePath", "Public/ViscaLiveLinkSettings.h" },
 #if !UE_BUILD_SHIPPING
-		{ "ToolTip", "Enter port as text (e.g. 52381)." },
+		{ "ToolTip", "TCP/UDP port this receiver binds to (default VISCA over IP: 52381)." },
 #endif
 	};
 	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_Transport_MetaData[] = {
-		{ "Category", "VISCA" },
+		{ "Category", "VISCA Source" },
 		{ "DisplayName", "Transport" },
 		{ "ModuleRelativePath", "Public/ViscaLiveLinkSettings.h" },
 	};
@@ -139,7 +150,7 @@ class UScriptStruct* FViscaReceiverConfig::StaticStruct()
 const UECodeGen_Private::FNamePropertyParams Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::NewProp_CameraName = { "CameraName", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Name, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(FViscaReceiverConfig, CameraName), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_CameraName_MetaData), NewProp_CameraName_MetaData) };
 const UECodeGen_Private::FStrPropertyParams Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::NewProp_PortString = { "PortString", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Str, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(FViscaReceiverConfig, PortString), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_PortString_MetaData), NewProp_PortString_MetaData) };
 const UECodeGen_Private::FBytePropertyParams Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::NewProp_Transport_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Byte, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, 0, nullptr, METADATA_PARAMS(0, nullptr) };
-const UECodeGen_Private::FEnumPropertyParams Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::NewProp_Transport = { "Transport", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(FViscaReceiverConfig, Transport), Z_Construct_UEnum_LiveLinkVISCA_EViscaReceiverTransportMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_Transport_MetaData), NewProp_Transport_MetaData) }; // 3505771629
+const UECodeGen_Private::FEnumPropertyParams Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::NewProp_Transport = { "Transport", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(FViscaReceiverConfig, Transport), Z_Construct_UEnum_LiveLinkVISCA_EViscaReceiverTransportMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_Transport_MetaData), NewProp_Transport_MetaData) }; // 1488562350
 const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::PropPointers[] = {
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::NewProp_CameraName,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::NewProp_PortString,
@@ -258,23 +269,32 @@ struct Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics
 {
 #if WITH_METADATA
 	static constexpr UECodeGen_Private::FMetaDataPairParam Class_MetaDataParams[] = {
+		{ "DisplayName", "VISCA over IP Source Settings" },
 		{ "IncludePath", "ViscaLiveLinkSettings.h" },
 		{ "ModuleRelativePath", "Public/ViscaLiveLinkSettings.h" },
 	};
 	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_ListenInterfaceIp_MetaData[] = {
-		{ "Category", "VISCA" },
+		{ "Category", "VISCA Source" },
 #if !UE_BUILD_SHIPPING
-		{ "Comment", "/** Dropdown: All interfaces (0.0.0.0), loopback, and local adapter IPv4s. */" },
+		{ "Comment", "/** Local IPv4 to bind, or 0.0.0.0 for all interfaces. */" },
 #endif
+		{ "DisplayName", "Bind Address" },
 		{ "GetOptions", "GetListenInterfaceOptions" },
 		{ "ModuleRelativePath", "Public/ViscaLiveLinkSettings.h" },
 #if !UE_BUILD_SHIPPING
-		{ "ToolTip", "Dropdown: All interfaces (0.0.0.0), loopback, and local adapter IPv4s." },
+		{ "ToolTip", "Local IPv4 to bind, or 0.0.0.0 for all interfaces." },
 #endif
 	};
 	static constexpr UECodeGen_Private::FMetaDataPairParam NewProp_Receivers_MetaData[] = {
-		{ "Category", "VISCA" },
+		{ "Category", "VISCA Source" },
+#if !UE_BUILD_SHIPPING
+		{ "Comment", "/** One Live Link subject per entry; each must use a unique port. */" },
+#endif
+		{ "DisplayName", "Receivers" },
 		{ "ModuleRelativePath", "Public/ViscaLiveLinkSettings.h" },
+#if !UE_BUILD_SHIPPING
+		{ "ToolTip", "One Live Link subject per entry; each must use a unique port." },
+#endif
 	};
 #endif // WITH_METADATA
 
@@ -300,8 +320,8 @@ struct Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics
 
 // ********** Begin Class UViscaLiveLinkSourceSettings Property Definitions ************************
 const UECodeGen_Private::FStrPropertyParams Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics::NewProp_ListenInterfaceIp = { "ListenInterfaceIp", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Str, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UViscaLiveLinkSourceSettings, ListenInterfaceIp), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_ListenInterfaceIp_MetaData), NewProp_ListenInterfaceIp_MetaData) };
-const UECodeGen_Private::FStructPropertyParams Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics::NewProp_Receivers_Inner = { "Receivers", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, 0, Z_Construct_UScriptStruct_FViscaReceiverConfig, METADATA_PARAMS(0, nullptr) }; // 622858001
-const UECodeGen_Private::FArrayPropertyParams Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics::NewProp_Receivers = { "Receivers", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Array, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UViscaLiveLinkSourceSettings, Receivers), EArrayPropertyFlags::None, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_Receivers_MetaData), NewProp_Receivers_MetaData) }; // 622858001
+const UECodeGen_Private::FStructPropertyParams Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics::NewProp_Receivers_Inner = { "Receivers", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, 0, Z_Construct_UScriptStruct_FViscaReceiverConfig, METADATA_PARAMS(0, nullptr) }; // 2297282591
+const UECodeGen_Private::FArrayPropertyParams Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics::NewProp_Receivers = { "Receivers", nullptr, (EPropertyFlags)0x0010000000000001, UECodeGen_Private::EPropertyGenFlags::Array, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UViscaLiveLinkSourceSettings, Receivers), EArrayPropertyFlags::None, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_Receivers_MetaData), NewProp_Receivers_MetaData) }; // 2297282591
 const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics::PropPointers[] = {
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics::NewProp_ListenInterfaceIp,
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UViscaLiveLinkSourceSettings_Statics::NewProp_Receivers_Inner,
@@ -351,16 +371,16 @@ UViscaLiveLinkSourceSettings::~UViscaLiveLinkSourceSettings() {}
 struct Z_CompiledInDeferFile_FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h__Script_LiveLinkVISCA_Statics
 {
 	static constexpr FEnumRegisterCompiledInInfo EnumInfo[] = {
-		{ EViscaReceiverTransportMode_StaticEnum, TEXT("EViscaReceiverTransportMode"), &Z_Registration_Info_UEnum_EViscaReceiverTransportMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 3505771629U) },
+		{ EViscaReceiverTransportMode_StaticEnum, TEXT("EViscaReceiverTransportMode"), &Z_Registration_Info_UEnum_EViscaReceiverTransportMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 1488562350U) },
 	};
 	static constexpr FStructRegisterCompiledInInfo ScriptStructInfo[] = {
-		{ FViscaReceiverConfig::StaticStruct, Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::NewStructOps, TEXT("ViscaReceiverConfig"),&Z_Registration_Info_UScriptStruct_FViscaReceiverConfig, CONSTRUCT_RELOAD_VERSION_INFO(FStructReloadVersionInfo, sizeof(FViscaReceiverConfig), 622858001U) },
+		{ FViscaReceiverConfig::StaticStruct, Z_Construct_UScriptStruct_FViscaReceiverConfig_Statics::NewStructOps, TEXT("ViscaReceiverConfig"),&Z_Registration_Info_UScriptStruct_FViscaReceiverConfig, CONSTRUCT_RELOAD_VERSION_INFO(FStructReloadVersionInfo, sizeof(FViscaReceiverConfig), 2297282591U) },
 	};
 	static constexpr FClassRegisterCompiledInInfo ClassInfo[] = {
-		{ Z_Construct_UClass_UViscaLiveLinkSourceSettings, UViscaLiveLinkSourceSettings::StaticClass, TEXT("UViscaLiveLinkSourceSettings"), &Z_Registration_Info_UClass_UViscaLiveLinkSourceSettings, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UViscaLiveLinkSourceSettings), 211851665U) },
+		{ Z_Construct_UClass_UViscaLiveLinkSourceSettings, UViscaLiveLinkSourceSettings::StaticClass, TEXT("UViscaLiveLinkSourceSettings"), &Z_Registration_Info_UClass_UViscaLiveLinkSourceSettings, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UViscaLiveLinkSourceSettings), 2213202198U) },
 	};
 }; // Z_CompiledInDeferFile_FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h__Script_LiveLinkVISCA_Statics 
-static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h__Script_LiveLinkVISCA_2624743079{
+static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h__Script_LiveLinkVISCA_2752364531{
 	TEXT("/Script/LiveLinkVISCA"),
 	Z_CompiledInDeferFile_FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h__Script_LiveLinkVISCA_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h__Script_LiveLinkVISCA_Statics::ClassInfo),
 	Z_CompiledInDeferFile_FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h__Script_LiveLinkVISCA_Statics::ScriptStructInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_VISCALivelinkDev_Plugins_LiveLinkVISCA_Source_LiveLinkVISCA_Public_ViscaLiveLinkSettings_h__Script_LiveLinkVISCA_Statics::ScriptStructInfo),

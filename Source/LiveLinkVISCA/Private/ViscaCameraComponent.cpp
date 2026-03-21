@@ -2,21 +2,49 @@
 
 #include "Camera/CameraComponent.h"
 #include "CineCameraComponent.h"
+#include "Engine/World.h"
 #include "Features/IModularFeatures.h"
 #include "ILiveLinkClient.h"
 #include "Roles/LiveLinkCameraRole.h"
 #include "Roles/LiveLinkCameraTypes.h"
 
+#if WITH_EDITOR
+#include "UObject/UnrealType.h"
+#endif
+
 UViscaCameraComponent::UViscaCameraComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
+	bTickInEditor = true;
+}
+
+void UViscaCameraComponent::OnRegister()
+{
+	Super::OnRegister();
+
+#if WITH_EDITOR
+	bTickInEditor = bUpdateInEditor;
+#endif
 }
 
 void UViscaCameraComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
+#if WITH_EDITOR
+void UViscaCameraComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	if (PropertyChangedEvent.Property
+		&& PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UViscaCameraComponent, bUpdateInEditor))
+	{
+		bTickInEditor = bUpdateInEditor;
+	}
+}
+#endif
 
 float UViscaCameraComponent::ApplyRange(float InValue, float InMin, float InMax) const
 {
@@ -76,6 +104,31 @@ void UViscaCameraComponent::ApplyToCamera(
 void UViscaCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (const UWorld* World = GetWorld())
+	{
+		if (World->WorldType == EWorldType::EditorPreview && !bUpdateInPreviewEditor)
+		{
+			return;
+		}
+	}
+
+	if (!bEvaluateLiveLink)
+	{
+		return;
+	}
+
+	if (bDisableEvaluateLiveLinkWhenSpawnable)
+	{
+		if (const AActor* Owner = GetOwner())
+		{
+			static const FName SequencerActorTag(TEXT("SequencerActor"));
+			if (Owner->ActorHasTag(SequencerActorTag))
+			{
+				return;
+			}
+		}
+	}
 
 	if (LiveLinkSubject.Name.IsNone())
 	{

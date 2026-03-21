@@ -1,4 +1,4 @@
-**Complete VISCA Command List (VISCA over IP – Software Version 2.00)**
+# VISCA command reference (VISCA over IP, software version 2.00)
 
 All commands below use the standard VISCA over IP format.  
 

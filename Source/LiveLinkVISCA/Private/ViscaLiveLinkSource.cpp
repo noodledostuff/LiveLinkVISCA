@@ -49,7 +49,7 @@ namespace
 FViscaLiveLinkSource::FViscaLiveLinkSource(const FViscaLiveLinkConnectionSettings& InSettings)
 	: Settings(InSettings)
 {
-	SourceType = LOCTEXT("SourceType", "VISCA LiveLink");
+	SourceType = LOCTEXT("SourceType", "Live Link (VISCA over IP)");
 	SourceMachineName = FText::FromString(Settings.ListenInterfaceIp);
 
 	SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
@@ -552,7 +552,7 @@ bool FViscaLiveLinkSource::IsSourceStillValid() const
 bool FViscaLiveLinkSource::RequestSourceShutdown()
 {
 	PerformShutdownOnce();
-	SourceStatus = LOCTEXT("SourceStatusDisconnected", "Disconnected");
+	SourceStatus = LOCTEXT("SourceStatusDisconnected", "Not listening");
 	return true;
 }
 
@@ -589,7 +589,7 @@ void FViscaLiveLinkSource::RefreshSourceStatus()
 	const int32 NumReceivers = Receivers.Num();
 	if (NumReceivers == 0)
 	{
-		SourceStatus = LOCTEXT("StatusNoReceivers", "No receivers — add cameras in Source Settings");
+		SourceStatus = LOCTEXT("StatusNoReceivers", "Idle: add at least one receiver in Source Settings");
 		return;
 	}
 
@@ -604,12 +604,12 @@ void FViscaLiveLinkSource::RefreshSourceStatus()
 
 	if (NumOk == NumReceivers)
 	{
-		SourceStatus = FText::Format(LOCTEXT("StatusListeningAll", "Listening ({0} receiver(s))"), NumReceivers);
+		SourceStatus = FText::Format(LOCTEXT("StatusListeningAll", "Listening on {0} receiver(s)"), NumReceivers);
 	}
 	else
 	{
 		SourceStatus = FText::Format(
-			LOCTEXT("StatusListeningPartial", "Listening {0} / {1} — check bind address and ports"),
+			LOCTEXT("StatusListeningPartial", "Partial: {0} / {1} receivers bound — verify bind address and ports"),
 			NumOk,
 			NumReceivers);
 	}
