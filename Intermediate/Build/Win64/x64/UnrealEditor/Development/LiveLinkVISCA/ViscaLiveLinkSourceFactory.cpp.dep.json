@@ -1,0 +1,33 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\source\\livelinkvisca\\private\\viscalivelinksourcefactory.cpp",
+        "ProvidedModule": "",
+        "PCH": "e:\\viscalivelinkdev\\intermediate\\build\\win64\\x64\\viscalivelinkdeveditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.h.pch",
+        "Includes": [
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\livelinkvisca\\definitions.livelinkvisca.h",
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\source\\livelinkvisca\\public\\viscalivelinksourcefactory.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\livelinksourcefactory.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinksourcefactory.generated.h",
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkvisca\\uht\\viscalivelinksourcefactory.generated.h",
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\source\\livelinkvisca\\public\\viscalivelinksettings.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\livelinksourcesettings.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\livelinktypes.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\livelinkrefskeleton.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinkrefskeleton.generated.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinktypes.generated.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinksourcesettings.generated.h",
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkvisca\\uht\\viscalivelinksettings.generated.h",
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\source\\livelinkvisca\\public\\viscalivelinksource.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\ilivelinksource.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\ilivelinksource.generated.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\networking\\public\\interfaces\\ipv4\\ipv4address.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\networking\\public\\interfaces\\ipv4\\ipv4subnetmask.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\networking\\public\\interfaces\\ipv4\\ipv4endpoint.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\sockets\\public\\socketsubsystem.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\sockets\\public\\addressinfotypes.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

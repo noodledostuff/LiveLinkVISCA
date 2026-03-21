@@ -2,8 +2,16 @@
 	"RemapUnityFiles": 
 	{
 		"Module.LiveLinkVISCA.cpp.obj": [
+			"LiveLinkVISCA.init.gen.cpp.obj",
+			"ViscaCameraComponent.gen.cpp.obj",
+			"ViscaLiveLinkSettings.gen.cpp.obj",
+			"ViscaLiveLinkSourceFactory.gen.cpp.obj",
 			"PerModuleInline.gen.cpp.obj",
-			"LiveLinkVISCA.cpp.obj"
+			"LiveLinkVISCA.cpp.obj",
+			"ViscaCameraComponent.cpp.obj",
+			"ViscaLiveLinkSettings.cpp.obj",
+			"ViscaLiveLinkSource.cpp.obj",
+			"ViscaLiveLinkSourceFactory.cpp.obj"
 		]
 	}
 }

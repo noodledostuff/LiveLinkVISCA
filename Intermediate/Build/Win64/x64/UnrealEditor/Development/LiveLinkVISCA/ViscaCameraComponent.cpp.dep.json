@@ -1,0 +1,41 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\source\\livelinkvisca\\private\\viscacameracomponent.cpp",
+        "ProvidedModule": "",
+        "PCH": "e:\\viscalivelinkdev\\intermediate\\build\\win64\\x64\\viscalivelinkdeveditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.h.pch",
+        "Includes": [
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\livelinkvisca\\definitions.livelinkvisca.h",
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\source\\livelinkvisca\\public\\viscacameracomponent.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\livelinktypes.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\livelinkrefskeleton.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinkrefskeleton.generated.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinktypes.generated.h",
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkvisca\\uht\\viscacameracomponent.generated.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\engine\\classes\\camera\\cameracomponent.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\cameracomponent.generated.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\cinematiccamera\\public\\cinecameracomponent.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\cinematiccamera\\public\\cinecamerasettings.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\cinematiccamera\\uht\\cinecamerasettings.generated.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\cinematiccamera\\uht\\cinecameracomponent.generated.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\ilivelinkclient.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\livelinkrole.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinkrole.generated.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\livelinkpresettypes.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinkpresettypes.generated.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\ilivelinkclient.generated.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\roles\\livelinkcamerarole.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\roles\\livelinktransformrole.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\roles\\livelinkbasicrole.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinkbasicrole.generated.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinktransformrole.generated.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinkcamerarole.generated.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\roles\\livelinkcameratypes.h",
+            "e:\\ue_5.7\\engine\\source\\runtime\\livelinkinterface\\public\\roles\\livelinktransformtypes.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinktransformtypes.generated.h",
+            "e:\\ue_5.7\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\livelinkinterface\\uht\\livelinkcameratypes.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

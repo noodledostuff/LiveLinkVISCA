@@ -1,24 +1,41 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0",
+	"VersionName": "0.1",
 	"FriendlyName": "LiveLinkVISCA",
-	"Description": "test",
-	"Category": "Other",
+	"Description": "LiveLink Implementation of Sony's VISCA Protocal",
+	"Category": "Virtual Production",
 	"CreatedBy": "Timothy YU",
 	"CreatedByURL": "www.noodledostuff.com",
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
 	"CanContainContent": true,
-	"IsBetaVersion": true,
-	"IsExperimentalVersion": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": true,
 	"Installed": false,
 	"Modules": [
 		{
 			"Name": "LiveLinkVISCA",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"LiveLink",
+				"LiveLinkInterface",
+				"LiveLinkComponents",
+				"CinematicCamera"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "LiveLink",
+			"Enabled": true
+		},
+		{
+			"Name": "LiveLinkCamera",
+			"Enabled": true
 		}
 	]
 }
