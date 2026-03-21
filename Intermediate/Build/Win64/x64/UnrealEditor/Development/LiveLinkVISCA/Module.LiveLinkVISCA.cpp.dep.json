@@ -1,0 +1,15 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\livelinkvisca\\module.livelinkvisca.cpp",
+        "ProvidedModule": "",
+        "PCH": "e:\\viscalivelinkdev\\intermediate\\build\\win64\\x64\\viscalivelinkdeveditor\\development\\unrealed\\sharedpch.unrealed.cpp20.h.pch",
+        "Includes": [
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\livelinkvisca\\definitions.livelinkvisca.h",
+            "e:\\viscalivelinkdev\\plugins\\livelinkvisca\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\livelinkvisca\\permoduleinline.gen.cpp",
+            "e:\\ue_5.7\\engine\\source\\runtime\\core\\public\\hal\\permoduleinline.inl"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
