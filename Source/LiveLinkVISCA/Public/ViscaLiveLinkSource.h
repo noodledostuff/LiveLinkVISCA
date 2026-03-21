@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HAL/CriticalSection.h"
 #include "HAL/Runnable.h"
 #include "HAL/ThreadSafeBool.h"
 #include "ILiveLinkSource.h"
@@ -46,9 +47,13 @@ private:
 		float NormalizedFocus = 0.0f;
 		float NormalizedIris = 0.0f;
 		float PanNormalized = 0.5f;
-		float TiltNormalized = 0.5f;
-		float PanSpeedNormalized = 0.0f;
-		float TiltSpeedNormalized = 0.0f;
+		/** Maps to degrees via Lerp(-30, 90, x); 0.25 == 0° (level). */
+		float TiltNormalized = 0.25f;
+		/** Signed pan/tilt drive rates (VISCA speed 0–1); integrated in Update() for continuous motion. */
+		float PanAxisVelocity = 0.0f;
+		float TiltAxisVelocity = 0.0f;
+		/** Signed zoom rate in normalized zoom units per second. */
+		float ZoomAxisVelocity = 0.0f;
 		FTransform CameraTransform = FTransform::Identity;
 		double LastUpdateTime = 0.0;
 		bool bAutoFocus = false;
@@ -65,11 +70,13 @@ private:
 		FName SubjectName;
 		bool bStaticDataPushed = false;
 		FViscaCameraState State;
-		TArray<uint8> PendingOutCommand;
-		int32 RetryCount = 0;
-		double LastSendTime = 0.0;
-		bool bAwaitingResponse = false;
 		TMap<uint8, FViscaCameraState> Presets;
+
+		/** TCP only: reassemble stream into VISCA-over-IP frames (8-byte header + payload). */
+		TArray<uint8> TcpReceiveBuffer;
+		/** TCP only: full IP packets to send; drained on the receiver thread (same as Recv). */
+		TArray<TArray<uint8>> PendingTcpIpPackets;
+		FCriticalSection TcpSendLock;
 	};
 
 private:
@@ -83,11 +90,31 @@ private:
 	void RefreshSourceStatus();
 	void EnsureSubject(FViscaReceiverRuntime& Receiver);
 	void PushFrame(const FViscaReceiverRuntime& Receiver);
-	void ProcessIncomingPacket(int32 ReceiverIndex, const TArray<uint8>& PacketData, const FIPv4Endpoint& SenderEndpoint);
+	void ProcessIncomingPacket(
+		int32 ReceiverIndex,
+		const TArray<uint8>& PacketData,
+		const FIPv4Endpoint& SenderEndpoint,
+		uint32 ViscaIpSequence,
+		bool bViscaIpWrapped);
 	bool ParseViscaPayload(const TArray<uint8>& PacketData, TArray<uint8>& OutViscaPayload) const;
 	void ApplyViscaCommandToState(FViscaReceiverRuntime& InOutReceiver, const TArray<uint8>& CommandPayload);
 	void UpdateTransformFromState(FViscaCameraState& InOutState);
-	void MaybeSendQueuedCommand(FViscaReceiverRuntime& InOutReceiver, const FIPv4Endpoint& SenderEndpoint);
+	void QueueViscaIpReply(FViscaReceiverRuntime& Receiver, uint32 Sequence, const TArray<uint8>& ViscaPayload);
+	void BuildViscaIpEnvelope(uint32 Sequence, const TArray<uint8>& ViscaPayload, TArray<uint8>& OutPacket) const;
+	void SendViscaCommandResponses(
+		FViscaReceiverRuntime& Receiver,
+		const TArray<uint8>& CommandPayload,
+		uint32 IpSequence,
+		bool bUseIpEnvelope,
+		const FIPv4Endpoint& UdpEndpoint,
+		const FViscaCameraState& StateForInquiryReplies);
+	void AppendInquiryCompletion(const TArray<uint8>& Inquiry, const FViscaCameraState& State, TArray<uint8>& OutVisca) const;
+	static void AppendViscaNibblesU14(TArray<uint8>& Out, uint32 Value14);
+	static void AppendViscaNibblesU16(TArray<uint8>& Out, uint32 Value16);
+	void FlushPendingTcpSends(FViscaReceiverRuntime& Receiver);
+	void ResetTcpClientConnection(FViscaReceiverRuntime& Receiver);
+	static bool TryConsumeTcpViscaMessage(TArray<uint8>& InOutBuffer, TArray<uint8>& OutVisca, uint32& OutSeq, bool& bOutIpWrapped);
+	static bool TryUnwrapUdpViscaIp(const TArray<uint8>& Datagram, TArray<uint8>& OutVisca, uint32& OutSeq, bool& bOutWrapped);
 
 private:
 	ILiveLinkClient* Client = nullptr;
@@ -109,4 +136,8 @@ private:
 	FText SourceType;
 	FText SourceMachineName;
 	FText SourceStatus;
+
+	/** Protects camera state + frame push paths used from the receiver thread and game-thread Update(). */
+	mutable FCriticalSection CameraStateLock;
+	double LastPtzIntegrateTimeSecs = 0.0;
 };
