@@ -26,10 +26,81 @@ Designed for **virtual production**, **broadcast**, and **previz** workflows whe
 
 ## Installation
 
-1. Copy the `**LiveLinkVISCA`** folder into your project’s `**Plugins**` directory (or clone this repo into `Plugins/LiveLinkVISCA`).
-2. Regenerate project files and **compile** the editor target.
+1. Copy the **LiveLinkVISCA** folder into your project’s **Plugins** directory (for example `YourProject/Plugins/LiveLinkVISCA`), or clone this repository to that path.
+2. Build the plugin (see [Build guide](#build-guide) below), then enable it in the editor.
 3. Enable **Live Link: VISCA** in **Edit → Plugins → Virtual Production** (or search for “VISCA”).
 4. Restart the editor if prompted.
+
+---
+
+## Build guide
+
+The plugin module **LiveLinkVISCA** is compiled with your **game/editor target** (it is not a standalone executable). You need a C++ Unreal project that lists this plugin and the engine versions must match your `.uproject` (for example **EngineAssociation** `5.7`).
+
+### Prerequisites
+
+- **Windows:** Visual Studio 2022 with the workloads Epic documents for your engine version (typically **Game development with C++** and the MSVC toolset UE expects).
+- **.NET:** Supplied with the engine; Unreal Build Tool uses it automatically.
+- **Engine:** A full Unreal Editor install (Launcher or source) for the version your project uses.
+
+### Project layout (for the included batch script)
+
+`BuildPlugin.bat` assumes the plugin lives at:
+
+`YourProject/Plugins/LiveLinkVISCA/`
+
+and that **one** `.uproject` exists in `YourProject/` (two directories above the script). If your layout differs, set **`VISCA_UPROJECT`** to the full path of your `.uproject` before running the script (see below).
+
+### Option A — Visual Studio / Rider (recommended for daily work)
+
+1. Right-click your **`*.uproject`** → **Generate Visual Studio project files** (if you have not already).
+2. Open the solution and build the **Editor** target for your game (for example **Development Editor** for `YourGameEditor`).
+3. The **LiveLinkVISCA** module builds as a dependency of that target.
+
+### Option B — `BuildPlugin.bat` (command line, Windows)
+
+The repository ships **`BuildPlugin.bat`** next to `LiveLinkVISCA.uplugin`. It invokes the engine’s **`Build.bat`** for the reference project **`VISCALivelinkDevEditor`** (Win64). If you use another project name, open **`BuildPlugin.bat`** and change the target on the `call "%BUILD_BAT%" ...` line to **`YourGameEditor`** (your editor target name from `*.Target.cs`).
+
+| Input | Description |
+|--------|----------------|
+| **Optional argument** | Build configuration: `Development` (default) or `Shipping`, etc. Example: `BuildPlugin.bat Shipping`. |
+| **`UE_ROOT`** | If unset, the script tries `E:\UE_5.7` then `%ProgramFiles%\Epic Games\UE_5.7`. Override to your engine root (the folder that **contains** `Engine`). |
+| **`VISCA_UPROJECT`** | Full path to your `.uproject` when the plugin is **not** under `Project/Plugins/LiveLinkVISCA`. |
+
+**Examples**
+
+```bat
+cd Plugins\LiveLinkVISCA
+BuildPlugin.bat
+```
+
+```bat
+set UE_ROOT=C:\Program Files\Epic Games\UE_5.7
+set VISCA_UPROJECT=D:\Work\MyGame\MyGame.uproject
+Plugins\LiveLinkVISCA\BuildPlugin.bat
+```
+
+### Option C — Engine `Build.bat` directly
+
+From a **Developer Command Prompt for VS** or any shell where `UE_ROOT` points at your install:
+
+```bat
+"%UE_ROOT%\Engine\Build\BatchFiles\Build.bat" YourGameEditor Win64 Development -Project="D:\Work\YourGame\YourGame.uproject" -WaitMutex
+```
+
+Replace **`YourGameEditor`** and the **`-Project=`** path with your project.
+
+### Packaging the plugin for distribution (optional)
+
+To produce a **standalone packaged plugin** (for example for Fab), use **RunUAT** `BuildPlugin` with your engine’s **RunUAT.bat**, pointing **`-Plugin=`** at `LiveLinkVISCA.uplugin` and **`-Package=`** at an output folder. That path validates the plugin against a clean engine tree; your Fab pipeline may already wrap this step.
+
+### Troubleshooting builds
+
+| Issue | What to try |
+|--------|----------------|
+| **Engine not found** | Set **`UE_ROOT`** explicitly to the folder that contains **`Engine`**, not to `Engine\Binaries\...` alone. |
+| **No .uproject found** | Use **`VISCA_UPROJECT`**, or move/sync the plugin under **`ProjectName/Plugins/LiveLinkVISCA`**. |
+| **Wrong target / link errors** | Regenerate project files; ensure **Live Link** and **Live Link Camera** are enabled in the host `.uproject`; match engine version to **EngineAssociation**. |
 
 ---
 

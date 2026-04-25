@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"Version": 0.1.0,
+	"Version": 1,
 	"VersionName": "0.1.0",
 	"FriendlyName": "LiveLinkVISCA",
 	"Description": "Live Link source and camera driver for VISCA over IP. Exposes pan/tilt/zoom and lens data as Live Link subjects using the Camera role.",
