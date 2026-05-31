@@ -46,6 +46,53 @@ namespace
 	{
 		return FMath::Clamp(FCString::Atoi(*PortString.TrimStartAndEnd()), 1, 65535);
 	}
+
+	FString BoolMetadata(bool bValue)
+	{
+		return bValue ? TEXT("1") : TEXT("0");
+	}
+
+	void ApplyOnOffParam(uint8 Param, bool& bOutValue)
+	{
+		if (Param == 0x02)
+		{
+			bOutValue = true;
+		}
+		else if (Param == 0x03)
+		{
+			bOutValue = false;
+		}
+	}
+
+	void ApplyPressReleaseParam(uint8 Param, bool& bOutValue)
+	{
+		if (Param == 0x01)
+		{
+			bOutValue = true;
+		}
+		else if (Param == 0x00)
+		{
+			bOutValue = false;
+		}
+	}
+
+	uint32 ReadViscaNibbles(const TArray<uint8>& Payload, int32 StartIndex, int32 Count)
+	{
+		uint32 Value = 0;
+		for (int32 Index = 0; Index < Count && Payload.IsValidIndex(StartIndex + Index); ++Index)
+		{
+			Value = (Value << 4) | (Payload[StartIndex + Index] & 0x0F);
+		}
+		return Value;
+	}
+
+	void AppendParamCompletion(TArray<uint8>& OutVisca, uint8 Param)
+	{
+		OutVisca.Add(0x90);
+		OutVisca.Add(0x51);
+		OutVisca.Add(Param);
+		OutVisca.Add(0xFF);
+	}
 }
 
 FViscaLiveLinkSource::FViscaLiveLinkSource(const FViscaLiveLinkConnectionSettings& InSettings)
@@ -293,7 +340,130 @@ void FViscaLiveLinkSource::AppendInquiryCompletion(const TArray<uint8>& Inq, con
 	}
 	if (Cat == 0x04 && Cmd == 0x00 && Inq.Num() >= 6 && Inq[4] == 0x02)
 	{
-		OutVisca = { 0x90, CmpMid, 0x02, 0xFF };
+		AppendParamCompletion(OutVisca, State.bPowerOn ? 0x02 : 0x03);
+		return;
+	}
+	if (Cat == 0x04 && Cmd == 0x38)
+	{
+		AppendParamCompletion(OutVisca, State.bAutoFocus ? 0x02 : 0x03);
+		return;
+	}
+	if (Cat == 0x05 && Cmd == 0x34)
+	{
+		AppendParamCompletion(OutVisca, State.bAutoIris ? 0x02 : 0x03);
+		return;
+	}
+	if (Cat == 0x05 && Cmd == 0x35)
+	{
+		AppendParamCompletion(OutVisca, State.bAutoShutter ? 0x02 : 0x03);
+		return;
+	}
+	if (Cat == 0x04 && Cmd == 0x33)
+	{
+		AppendParamCompletion(OutVisca, State.bBacklightCompensation ? 0x02 : 0x03);
+		return;
+	}
+	if (Cat == 0x04 && Cmd == 0x3A)
+	{
+		AppendParamCompletion(OutVisca, State.bSpotlightCompensation ? 0x02 : 0x03);
+		return;
+	}
+	if (Cat == 0x04 && Cmd == 0x35)
+	{
+		AppendParamCompletion(OutVisca, State.WhiteBalanceMode);
+		return;
+	}
+	if (Cat == 0x04 && Cmd == 0x7D)
+	{
+		AppendParamCompletion(OutVisca, State.bColorBar ? 0x02 : 0x03);
+		return;
+	}
+	if (Cat == 0x06 && Cmd == 0x06)
+	{
+		AppendParamCompletion(OutVisca, State.bMenuOpen ? 0x02 : 0x03);
+		return;
+	}
+	if (Cat == 0x7E && Cmd == 0x01 && Inq.Num() >= 5)
+	{
+		if (Inq[4] == 0x53)
+		{
+			AppendParamCompletion(OutVisca, State.NdPreset);
+			return;
+		}
+		if (Inq[4] == 0x75)
+		{
+			AppendParamCompletion(OutVisca, State.bAgc ? 0x02 : 0x03);
+			return;
+		}
+		if (Inq[4] == 0x60)
+		{
+			AppendParamCompletion(OutVisca, State.bDetailEnabled ? 0x02 : 0x03);
+			return;
+		}
+		if (Inq[4] == 0x6D)
+		{
+			AppendParamCompletion(OutVisca, State.bKneeEnabled ? 0x02 : 0x03);
+			return;
+		}
+		if (Inq[4] == 0x54)
+		{
+			AppendParamCompletion(OutVisca, State.KneeMode);
+			return;
+		}
+		if (Inq[4] == 0x0A)
+		{
+			AppendParamCompletion(OutVisca, State.bTallyRed ? 0x02 : 0x03);
+			return;
+		}
+	}
+	if (Cat == 0x7E && Cmd == 0x04 && Inq.Num() >= 5)
+	{
+		if (Inq[4] == 0x52)
+		{
+			AppendParamCompletion(OutVisca, State.bVariableNdMode ? 0x01 : 0x00);
+			return;
+		}
+		if (Inq[4] == 0x42)
+		{
+			const uint32 N = FMath::Clamp(static_cast<uint32>(State.NormalizedNd * 0x14), 0u, 0x14u);
+			OutVisca.Add(0x90);
+			OutVisca.Add(CmpMid);
+			OutVisca.Add(0x00);
+			OutVisca.Add(0x00);
+			OutVisca.Add(static_cast<uint8>((N >> 4) & 0x0F));
+			OutVisca.Add(static_cast<uint8>(N & 0x0F));
+			OutVisca.Add(0xFF);
+			return;
+		}
+		if (Inq[4] == 0x53)
+		{
+			AppendParamCompletion(OutVisca, State.bAutoNd ? 0x02 : 0x03);
+			return;
+		}
+		if (Inq[4] == 0x54)
+		{
+			AppendParamCompletion(OutVisca, State.bNdFiltered ? 0x02 : 0x03);
+			return;
+		}
+		if (Inq[4] == 0x1D)
+		{
+			AppendParamCompletion(OutVisca, State.bRecording ? 0x01 : 0x00);
+			return;
+		}
+		if (Inq[4] == 0x1A)
+		{
+			AppendParamCompletion(OutVisca, State.bTallyGreen ? 0x02 : 0x03);
+			return;
+		}
+		if (Inq[4] == 0x60)
+		{
+			OutVisca = { 0x90, CmpMid, State.AudioLevelChannel, static_cast<uint8>(State.bAudioLevelAuto ? 0x01 : 0x00), 0xFF };
+			return;
+		}
+	}
+	if (Cat == 0x04 && Cmd == 0x0E)
+	{
+		AppendParamCompletion(OutVisca, static_cast<uint8>(FMath::Clamp(FMath::RoundToInt(State.NormalizedAeLevel * 0x0E), 0, 0x0E)));
 		return;
 	}
 	if (Cat == 0x00 && Cmd == 0x02)
@@ -881,7 +1051,46 @@ void FViscaLiveLinkSource::PushFrame(const FViscaReceiverRuntime& Receiver)
 	// Valid scene time keeps Timecode evaluation mode and frame-rate bookkeeping from starving snapshots.
 	const FFrameTime SceneFrameTime = ViscaSceneFrameRate.AsFrameTime(WorldSeconds);
 	FrameData.MetaData.SceneTime = FQualifiedFrameTime(SceneFrameTime, ViscaSceneFrameRate);
-	FrameData.MetaData.StringMetaData.Add(TEXT("ViscaSubject"), Receiver.SubjectName.ToString());
+	const FViscaCameraState& State = Receiver.State;
+	auto AddMeta = [&FrameData](const TCHAR* Key, const FString& Value)
+	{
+		FrameData.MetaData.StringMetaData.Add(Key, Value);
+	};
+	auto AddBoolMeta = [&AddMeta](const TCHAR* Key, bool bValue)
+	{
+		AddMeta(Key, BoolMetadata(bValue));
+	};
+
+	AddMeta(TEXT("ViscaSubject"), Receiver.SubjectName.ToString());
+	AddBoolMeta(TEXT("ViscaPowerOn"), State.bPowerOn);
+	AddBoolMeta(TEXT("ViscaMenuOpen"), State.bMenuOpen);
+	AddBoolMeta(TEXT("ViscaColorBar"), State.bColorBar);
+	AddBoolMeta(TEXT("ViscaAutoFocus"), State.bAutoFocus);
+	AddBoolMeta(TEXT("ViscaAutoIris"), State.bAutoIris);
+	AddBoolMeta(TEXT("ViscaAgc"), State.bAgc);
+	AddBoolMeta(TEXT("ViscaAutoShutter"), State.bAutoShutter);
+	AddBoolMeta(TEXT("ViscaBacklightCompensation"), State.bBacklightCompensation);
+	AddBoolMeta(TEXT("ViscaSpotlightCompensation"), State.bSpotlightCompensation);
+	AddBoolMeta(TEXT("ViscaDetailEnabled"), State.bDetailEnabled);
+	AddBoolMeta(TEXT("ViscaKneeEnabled"), State.bKneeEnabled);
+	AddBoolMeta(TEXT("ViscaVariableNdMode"), State.bVariableNdMode);
+	AddBoolMeta(TEXT("ViscaAutoNd"), State.bAutoNd);
+	AddBoolMeta(TEXT("ViscaNdFiltered"), State.bNdFiltered);
+	AddBoolMeta(TEXT("ViscaTallyRed"), State.bTallyRed);
+	AddBoolMeta(TEXT("ViscaTallyGreen"), State.bTallyGreen);
+	AddBoolMeta(TEXT("ViscaRecording"), State.bRecording);
+	AddBoolMeta(TEXT("ViscaAudioLevelAuto"), State.bAudioLevelAuto);
+	AddMeta(TEXT("ViscaNdPreset"), FString::FromInt(State.NdPreset));
+	AddMeta(TEXT("ViscaWhiteBalanceMode"), FString::Printf(TEXT("%02X"), State.WhiteBalanceMode));
+	AddMeta(TEXT("ViscaKneeMode"), FString::Printf(TEXT("%02X"), State.KneeMode));
+	AddMeta(TEXT("ViscaAudioLevelChannel"), FString::FromInt(State.AudioLevelChannel));
+	AddMeta(TEXT("ViscaNormalizedNd"), FString::SanitizeFloat(State.NormalizedNd));
+	AddMeta(TEXT("ViscaNormalizedAeLevel"), FString::SanitizeFloat(State.NormalizedAeLevel));
+	AddMeta(TEXT("ViscaNormalizedDetailLevel"), FString::SanitizeFloat(State.NormalizedDetailLevel));
+	AddMeta(TEXT("ViscaNormalizedWhiteTemperature"), FString::SanitizeFloat(State.NormalizedWhiteTemperature));
+	AddMeta(TEXT("ViscaNormalizedRGain"), FString::SanitizeFloat(State.NormalizedRGain));
+	AddMeta(TEXT("ViscaNormalizedBGain"), FString::SanitizeFloat(State.NormalizedBGain));
+	AddMeta(TEXT("ViscaNormalizedAudioInputLevel"), FString::SanitizeFloat(State.NormalizedAudioInputLevel));
 	FrameData.Transform = Receiver.State.CameraTransform;
 	FrameData.FocalLength = Receiver.State.NormalizedZoom;
 	FrameData.FocusDistance = Receiver.State.NormalizedFocus;
@@ -974,7 +1183,207 @@ void FViscaLiveLinkSource::ApplyViscaCommandToState(FViscaReceiverRuntime& InOut
 	const uint8 Command = CommandPayload[3];
 	InOutState.LastUpdateTime = FPlatformTime::Seconds();
 
-	if (Category == 0x04 && Command == 0x07 && CommandPayload.Num() >= 6)
+	if (Category == 0x04 && Command == 0x00 && CommandPayload.Num() >= 6)
+	{
+		ApplyOnOffParam(CommandPayload[4], InOutState.bPowerOn);
+	}
+	else if (Category == 0x04 && Command == 0x0E && CommandPayload.Num() >= 6)
+	{
+		const float Delta = 1.0f / 14.0f;
+		if (CommandPayload[4] == 0x02)
+		{
+			InOutState.NormalizedAeLevel = FMath::Clamp(InOutState.NormalizedAeLevel + Delta, 0.0f, 1.0f);
+		}
+		else if (CommandPayload[4] == 0x03)
+		{
+			InOutState.NormalizedAeLevel = FMath::Clamp(InOutState.NormalizedAeLevel - Delta, 0.0f, 1.0f);
+		}
+	}
+	else if (Category == 0x04 && Command == 0x02 && CommandPayload.Num() >= 6)
+	{
+		const float Delta = 1.0f / 14.0f;
+		if (CommandPayload[4] == 0x02)
+		{
+			InOutState.NormalizedDetailLevel = FMath::Clamp(InOutState.NormalizedDetailLevel + Delta, 0.0f, 1.0f);
+		}
+		else if (CommandPayload[4] == 0x03)
+		{
+			InOutState.NormalizedDetailLevel = FMath::Clamp(InOutState.NormalizedDetailLevel - Delta, 0.0f, 1.0f);
+		}
+	}
+	else if (Category == 0x04 && Command == 0x33 && CommandPayload.Num() >= 6)
+	{
+		ApplyOnOffParam(CommandPayload[4], InOutState.bBacklightCompensation);
+	}
+	else if (Category == 0x04 && Command == 0x42 && CommandPayload.Num() >= 6)
+	{
+		InOutState.NormalizedDetailLevel = FMath::Clamp(static_cast<float>(CommandPayload[4] & 0x0F) / 0x0Ef, 0.0f, 1.0f);
+	}
+	else if (Category == 0x04 && Command == 0x35 && CommandPayload.Num() >= 6)
+	{
+		InOutState.WhiteBalanceMode = CommandPayload[4];
+	}
+	else if (Category == 0x04 && Command == 0x3A && CommandPayload.Num() >= 6)
+	{
+		ApplyOnOffParam(CommandPayload[4], InOutState.bSpotlightCompensation);
+	}
+	else if (Category == 0x04 && Command == 0x7D && CommandPayload.Num() >= 6)
+	{
+		ApplyOnOffParam(CommandPayload[4], InOutState.bColorBar);
+	}
+	else if (Category == 0x05 && Command == 0x35 && CommandPayload.Num() >= 6)
+	{
+		ApplyOnOffParam(CommandPayload[4], InOutState.bAutoShutter);
+	}
+	else if (Category == 0x05 && Command == 0x03 && CommandPayload.Num() >= 9)
+	{
+		const bool bUp = CommandPayload[4] == 0x02;
+		const float Delta = static_cast<float>(FMath::Clamp(static_cast<int32>(CommandPayload[6]) * 16 + CommandPayload[7], 1, 255)) / 255.0f;
+		InOutState.NormalizedWhiteTemperature = FMath::Clamp(InOutState.NormalizedWhiteTemperature + (bUp ? Delta : -Delta), 0.0f, 1.0f);
+	}
+	else if (Category == 0x05 && Command == 0x43 && CommandPayload.Num() >= 10)
+	{
+		const uint32 RawWhiteTemp = ReadViscaNibbles(CommandPayload, 5, 4);
+		InOutState.NormalizedWhiteTemperature = FMath::Clamp((static_cast<float>(RawWhiteTemp) - 0x07D0f) / (0x3A98f - 0x07D0f), 0.0f, 1.0f);
+	}
+	else if (Category == 0x06 && Command == 0x06 && CommandPayload.Num() >= 6)
+	{
+		const uint8 MenuParam = CommandPayload[4];
+		if (MenuParam == 0x02)
+		{
+			InOutState.bMenuOpen = true;
+		}
+		else if (MenuParam == 0x03)
+		{
+			InOutState.bMenuOpen = false;
+		}
+		else if (MenuParam == 0x10)
+		{
+			InOutState.bMenuOpen = !InOutState.bMenuOpen;
+		}
+	}
+	else if (Category == 0x7E && Command == 0x01 && CommandPayload.Num() >= 6)
+	{
+		const uint8 ExtCommand = CommandPayload[4];
+		if (ExtCommand == 0x53)
+		{
+			InOutState.NdPreset = CommandPayload[5];
+			InOutState.bNdFiltered = InOutState.NdPreset != 0;
+		}
+		else if (ExtCommand == 0x75)
+		{
+			ApplyOnOffParam(CommandPayload[5], InOutState.bAgc);
+		}
+		else if (ExtCommand == 0x60)
+		{
+			ApplyOnOffParam(CommandPayload[5], InOutState.bDetailEnabled);
+		}
+		else if (ExtCommand == 0x6D)
+		{
+			ApplyOnOffParam(CommandPayload[5], InOutState.bKneeEnabled);
+		}
+		else if (ExtCommand == 0x54)
+		{
+			InOutState.KneeMode = CommandPayload[5];
+		}
+		else if (ExtCommand == 0x0A)
+		{
+			ApplyOnOffParam(CommandPayload[5], InOutState.bTallyRed);
+		}
+		else if ((ExtCommand == 0x63 || ExtCommand == 0x64) && CommandPayload.Num() >= 9)
+		{
+			const bool bUp = CommandPayload[5] == 0x02;
+			const float Delta = static_cast<float>(FMath::Clamp(static_cast<int32>(CommandPayload[7]) * 16 + CommandPayload[8], 1, 255)) / 255.0f;
+			float& Target = ExtCommand == 0x63 ? InOutState.NormalizedRGain : InOutState.NormalizedBGain;
+			Target = FMath::Clamp(Target + (bUp ? Delta : -Delta), 0.0f, 1.0f);
+		}
+	}
+	else if (Category == 0x7E && Command == 0x04 && CommandPayload.Num() >= 6)
+	{
+		const uint8 ExtCommand = CommandPayload[4];
+		if (ExtCommand == 0x17 && CommandPayload.Num() >= 11)
+		{
+			const bool bTele = CommandPayload[5] == 0x02;
+			const int32 RawSpeed = (CommandPayload[6] << 12) | (CommandPayload[7] << 8) | (CommandPayload[8] << 4) | CommandPayload[9];
+			const float SpeedNorm = FMath::Clamp(static_cast<float>(RawSpeed) / static_cast<float>(0x7FFE), 0.01f, 1.0f);
+			InOutState.ZoomAxisVelocity = (bTele ? 1.0f : -1.0f) * SpeedNorm * ZoomHighResVelocityScale;
+		}
+		else if (ExtCommand == 0x4B && CommandPayload.Num() >= 9)
+		{
+			const bool bIsUp = CommandPayload[5] == 0x02;
+			const float Delta = static_cast<float>(FMath::Clamp(static_cast<int32>(CommandPayload[6]) * 16 + CommandPayload[7], 1, 255)) / 255.0f;
+			InOutState.NormalizedIris = FMath::Clamp(InOutState.NormalizedIris + (bIsUp ? Delta : -Delta), 0.0f, 1.0f);
+		}
+		else if (ExtCommand == 0x52)
+		{
+			InOutState.bVariableNdMode = CommandPayload[5] == 0x01;
+		}
+		else if (ExtCommand == 0x12)
+		{
+			const float Delta = 1.0f / 20.0f;
+			if (CommandPayload[5] == 0x02)
+			{
+				InOutState.NormalizedNd = FMath::Clamp(InOutState.NormalizedNd + Delta, 0.0f, 1.0f);
+				InOutState.bNdFiltered = true;
+			}
+			else if (CommandPayload[5] == 0x03)
+			{
+				InOutState.NormalizedNd = FMath::Clamp(InOutState.NormalizedNd - Delta, 0.0f, 1.0f);
+				InOutState.bNdFiltered = InOutState.NormalizedNd > 0.0f;
+			}
+		}
+		else if (ExtCommand == 0x42 && CommandPayload.Num() >= 9)
+		{
+			const uint32 RawNd = ReadViscaNibbles(CommandPayload, 7, 2);
+			InOutState.NormalizedNd = FMath::Clamp(static_cast<float>(RawNd) / 0x14f, 0.0f, 1.0f);
+			InOutState.bNdFiltered = RawNd > 0;
+		}
+		else if (ExtCommand == 0x53)
+		{
+			ApplyOnOffParam(CommandPayload[5], InOutState.bAutoNd);
+		}
+		else if (ExtCommand == 0x54)
+		{
+			ApplyOnOffParam(CommandPayload[5], InOutState.bNdFiltered);
+			if (!InOutState.bNdFiltered)
+			{
+				InOutState.NormalizedNd = 0.0f;
+				InOutState.NdPreset = 0;
+			}
+		}
+		else if (ExtCommand == 0x46 && CommandPayload.Num() >= 10)
+		{
+			InOutState.NormalizedRGain = FMath::Clamp(static_cast<float>(ReadViscaNibbles(CommandPayload, 6, 4)) / 0x07BCf, 0.0f, 1.0f);
+		}
+		else if (ExtCommand == 0x56 && CommandPayload.Num() >= 10)
+		{
+			InOutState.NormalizedBGain = FMath::Clamp(static_cast<float>(ReadViscaNibbles(CommandPayload, 6, 4)) / 0x07BCf, 0.0f, 1.0f);
+		}
+		else if (ExtCommand == 0x1D)
+		{
+			ApplyPressReleaseParam(CommandPayload[5], InOutState.bRecording);
+		}
+		else if (ExtCommand == 0x1A && CommandPayload.Num() >= 8)
+		{
+			ApplyOnOffParam(CommandPayload[7], InOutState.bTallyGreen);
+		}
+		else if (ExtCommand == 0x60 && CommandPayload.Num() >= 7)
+		{
+			InOutState.AudioLevelChannel = CommandPayload[5];
+			InOutState.bAudioLevelAuto = CommandPayload[6] == 0x01;
+		}
+		else if (ExtCommand == 0x61 && CommandPayload.Num() >= 9)
+		{
+			InOutState.NormalizedAudioInputLevel = FMath::Clamp(static_cast<float>(ReadViscaNibbles(CommandPayload, 6, 2)) / 0xFFf, 0.0f, 1.0f);
+		}
+		else if (ExtCommand == 0x62 && CommandPayload.Num() >= 9)
+		{
+			const bool bUp = CommandPayload[5] == 0x02;
+			const float Delta = static_cast<float>(FMath::Clamp(static_cast<int32>(CommandPayload[7]) * 16 + CommandPayload[8], 1, 255)) / 255.0f;
+			InOutState.NormalizedAudioInputLevel = FMath::Clamp(InOutState.NormalizedAudioInputLevel + (bUp ? Delta : -Delta), 0.0f, 1.0f);
+		}
+	}
+	else if (Category == 0x04 && Command == 0x07 && CommandPayload.Num() >= 6)
 	{
 		// Zoom standard/variable/stop — sustained velocity until stop or direct zoom.
 		const uint8 ZoomParam = CommandPayload[4];

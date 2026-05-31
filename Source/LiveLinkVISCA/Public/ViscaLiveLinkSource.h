@@ -60,6 +60,33 @@ private:
 		double LastUpdateTime = 0.0;
 		bool bAutoFocus = false;
 		bool bAutoIris = false;
+		bool bPowerOn = true;
+		bool bMenuOpen = false;
+		bool bColorBar = false;
+		bool bAgc = false;
+		bool bAutoShutter = false;
+		bool bBacklightCompensation = false;
+		bool bSpotlightCompensation = false;
+		bool bDetailEnabled = false;
+		bool bKneeEnabled = false;
+		bool bVariableNdMode = false;
+		bool bAutoNd = false;
+		bool bNdFiltered = false;
+		bool bTallyRed = false;
+		bool bTallyGreen = false;
+		bool bRecording = false;
+		bool bAudioLevelAuto = false;
+		uint8 NdPreset = 0;
+		uint8 WhiteBalanceMode = 0x04;
+		uint8 KneeMode = 0x00;
+		uint8 AudioLevelChannel = 1;
+		float NormalizedNd = 0.0f;
+		float NormalizedAeLevel = 0.5f;
+		float NormalizedDetailLevel = 0.5f;
+		float NormalizedWhiteTemperature = 0.5f;
+		float NormalizedRGain = 0.5f;
+		float NormalizedBGain = 0.5f;
+		float NormalizedAudioInputLevel = 0.5f;
 	};
 
 	struct FViscaReceiverRuntime
