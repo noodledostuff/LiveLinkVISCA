@@ -54,6 +54,8 @@ private:
 		float TiltAxisVelocity = 0.0f;
 		/** Signed zoom rate in normalized zoom units per second. */
 		float ZoomAxisVelocity = 0.0f;
+		/** Signed focus rate in normalized focus units per second. */
+		float FocusAxisVelocity = 0.0f;
 		FTransform CameraTransform = FTransform::Identity;
 		double LastUpdateTime = 0.0;
 		bool bAutoFocus = false;

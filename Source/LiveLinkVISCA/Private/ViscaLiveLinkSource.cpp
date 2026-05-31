@@ -27,8 +27,6 @@ namespace
 	constexpr int32 MaxUdpPacketSize = 65507;
 	/** Scene time for Live Link frames (Timecode / display paths); world evaluation still uses WorldTime. */
 	static const FFrameRate ViscaSceneFrameRate(60, 1);
-	constexpr float StandardStep = 0.02f;
-	constexpr float VariableStepScale = 0.005f;
 	/** Lerp(-30°, 90°, x) == 0° when x == 0.25. */
 	constexpr float DefaultTiltNormalizedForLevel = 0.25f;
 	/** Pan/tilt normalized position change per second at VISCA speed 1.0. */
@@ -39,6 +37,10 @@ namespace
 	constexpr float ZoomVariableVelocityScale = 0.55f;
 	/** High-res zoom max magnitude (normalized zoom / sec). */
 	constexpr float ZoomHighResVelocityScale = 0.65f;
+	/** Standard focus far/near sustained rate (normalized focus / sec). */
+	constexpr float FocusStandardVelocity = 0.35f;
+	/** Variable focus: scales (speedNibble+1)/8 to normalized focus / sec. */
+	constexpr float FocusVariableVelocityScale = 0.45f;
 
 	int32 ParsePortString(const FString& PortString)
 	{
@@ -642,7 +644,8 @@ void FViscaLiveLinkSource::Update()
 		FViscaCameraState& S = Receiver.State;
 		const bool bMoving = !FMath::IsNearlyZero(S.PanAxisVelocity, 1.e-4f)
 			|| !FMath::IsNearlyZero(S.TiltAxisVelocity, 1.e-4f)
-			|| !FMath::IsNearlyZero(S.ZoomAxisVelocity, 1.e-4f);
+			|| !FMath::IsNearlyZero(S.ZoomAxisVelocity, 1.e-4f)
+			|| !FMath::IsNearlyZero(S.FocusAxisVelocity, 1.e-4f);
 		if (!bMoving)
 		{
 			continue;
@@ -651,6 +654,7 @@ void FViscaLiveLinkSource::Update()
 		S.PanNormalized = FMath::Clamp(S.PanNormalized + S.PanAxisVelocity * PanTiltDriveUnitsPerSec * Dt, 0.0f, 1.0f);
 		S.TiltNormalized = FMath::Clamp(S.TiltNormalized + S.TiltAxisVelocity * PanTiltDriveUnitsPerSec * Dt, 0.0f, 1.0f);
 		S.NormalizedZoom = FMath::Clamp(S.NormalizedZoom + S.ZoomAxisVelocity * Dt, 0.0f, 1.0f);
+		S.NormalizedFocus = FMath::Clamp(S.NormalizedFocus + S.FocusAxisVelocity * Dt, 0.0f, 1.0f);
 		UpdateTransformFromState(S);
 		PushFrame(Receiver);
 	}
@@ -1018,25 +1022,25 @@ void FViscaLiveLinkSource::ApplyViscaCommandToState(FViscaReceiverRuntime& InOut
 		const uint8 FocusParam = CommandPayload[4];
 		if (FocusParam == 0x00)
 		{
-			// Stop: keep current focus.
+			InOutState.FocusAxisVelocity = 0.0f;
 		}
 		else if (FocusParam == 0x02)
 		{
-			InOutState.NormalizedFocus = FMath::Clamp(InOutState.NormalizedFocus + StandardStep, 0.0f, 1.0f);
+			InOutState.FocusAxisVelocity = FocusStandardVelocity;
 		}
 		else if (FocusParam == 0x03)
 		{
-			InOutState.NormalizedFocus = FMath::Clamp(InOutState.NormalizedFocus - StandardStep, 0.0f, 1.0f);
+			InOutState.FocusAxisVelocity = -FocusStandardVelocity;
 		}
 		else if ((FocusParam & 0xF0) == 0x20)
 		{
 			const float Speed = static_cast<float>(FocusParam & 0x0F);
-			InOutState.NormalizedFocus = FMath::Clamp(InOutState.NormalizedFocus + (Speed + 1.0f) * VariableStepScale, 0.0f, 1.0f);
+			InOutState.FocusAxisVelocity = ((Speed + 1.0f) / 8.0f) * FocusVariableVelocityScale;
 		}
 		else if ((FocusParam & 0xF0) == 0x30)
 		{
 			const float Speed = static_cast<float>(FocusParam & 0x0F);
-			InOutState.NormalizedFocus = FMath::Clamp(InOutState.NormalizedFocus - (Speed + 1.0f) * VariableStepScale, 0.0f, 1.0f);
+			InOutState.FocusAxisVelocity = -((Speed + 1.0f) / 8.0f) * FocusVariableVelocityScale;
 		}
 	}
 	else if (Category == 0x04 && Command == 0x48 && CommandPayload.Num() >= 9)
@@ -1044,6 +1048,7 @@ void FViscaLiveLinkSource::ApplyViscaCommandToState(FViscaReceiverRuntime& InOut
 		// Focus Direct: 0x0000 - 0xFFFF
 		const int32 RawFocus = (CommandPayload[4] << 12) | (CommandPayload[5] << 8) | (CommandPayload[6] << 4) | CommandPayload[7];
 		InOutState.NormalizedFocus = FMath::Clamp(static_cast<float>(RawFocus) / 65535.0f, 0.0f, 1.0f);
+		InOutState.FocusAxisVelocity = 0.0f;
 	}
 	else if (Category == 0x04 && Command == 0x38 && CommandPayload.Num() >= 6)
 	{
@@ -1158,6 +1163,7 @@ void FViscaLiveLinkSource::ApplyViscaCommandToState(FViscaReceiverRuntime& InOut
 		InOutState.PanAxisVelocity = 0.0f;
 		InOutState.TiltAxisVelocity = 0.0f;
 		InOutState.ZoomAxisVelocity = 0.0f;
+		InOutState.FocusAxisVelocity = 0.0f;
 	}
 	else if (Category == 0x06 && Command == 0x05)
 	{
@@ -1175,6 +1181,7 @@ void FViscaLiveLinkSource::ApplyViscaCommandToState(FViscaReceiverRuntime& InOut
 			Snapshot.PanAxisVelocity = 0.0f;
 			Snapshot.TiltAxisVelocity = 0.0f;
 			Snapshot.ZoomAxisVelocity = 0.0f;
+			Snapshot.FocusAxisVelocity = 0.0f;
 			InOutReceiver.Presets.Add(PresetSlot, Snapshot);
 		}
 		else if (PresetAction == 0x00)
