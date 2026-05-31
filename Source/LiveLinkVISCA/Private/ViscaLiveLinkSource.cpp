@@ -12,6 +12,7 @@
 #include "SocketSubsystem.h"
 #include "Sockets.h"
 #include "SocketTypes.h"
+#include "ViscaLiveLinkRole.h"
 #include "Net/Common/Sockets/SocketErrors.h"
 #include "Misc/App.h"
 #include "Misc/QualifiedFrameTime.h"
@@ -19,6 +20,7 @@
 #include "HAL/PlatformMemory.h"
 #include "HAL/PlatformTime.h"
 #include "UObject/UnrealType.h"
+#include "ViscaLiveLinkTypes.h"
 
 #define LOCTEXT_NAMESPACE "ViscaLiveLinkSource"
 
@@ -92,6 +94,11 @@ namespace
 		OutVisca.Add(0x51);
 		OutVisca.Add(Param);
 		OutVisca.Add(0xFF);
+	}
+
+	FName MakeViscaSubjectName(FName CameraSubjectName)
+	{
+		return FName(*FString::Printf(TEXT("%s_VISCA"), *CameraSubjectName.ToString()));
 	}
 }
 
@@ -1032,6 +1039,48 @@ void FViscaLiveLinkSource::EnsureSubject(FViscaReceiverRuntime& Receiver)
 		Client->PushSubjectStaticData_AnyThread(SubjectKey, ULiveLinkCameraRole::StaticClass(), MoveTemp(StaticDataStruct));
 		Receiver.bStaticDataPushed = true;
 	}
+
+	EnsureViscaSubject(Receiver);
+}
+
+void FViscaLiveLinkSource::EnsureViscaSubject(FViscaReceiverRuntime& Receiver)
+{
+	if (!Client)
+	{
+		return;
+	}
+
+	const FName ViscaSubjectName = MakeViscaSubjectName(Receiver.SubjectName);
+	const FLiveLinkSubjectKey SubjectKey(SourceGuid, ViscaSubjectName);
+	if (!CreatedSubjects.Contains(ViscaSubjectName))
+	{
+		FLiveLinkSubjectPreset Preset;
+		Preset.Key = SubjectKey;
+		Preset.Role = ULiveLinkVISCACameraRole::StaticClass();
+		Preset.bEnabled = true;
+		if (!Client->CreateSubject(Preset))
+		{
+			return;
+		}
+		Client->SetSubjectEnabled(SubjectKey, true);
+
+		CreatedSubjects.Add(ViscaSubjectName);
+	}
+
+	if (!Receiver.bViscaStaticDataPushed)
+	{
+		FLiveLinkStaticDataStruct StaticDataStruct(FLiveLinkVISCACameraStaticData::StaticStruct());
+		FLiveLinkVISCACameraStaticData& StaticData = *StaticDataStruct.Cast<FLiveLinkVISCACameraStaticData>();
+		StaticData.bHasExtendedViscaState = true;
+		StaticData.bIsFocalLengthSupported = true;
+		StaticData.bIsApertureSupported = true;
+		StaticData.bIsFocusDistanceSupported = true;
+		StaticData.bIsLocationSupported = false;
+		StaticData.bIsRotationSupported = true;
+		StaticData.bIsScaleSupported = false;
+		Client->PushSubjectStaticData_AnyThread(SubjectKey, ULiveLinkVISCACameraRole::StaticClass(), MoveTemp(StaticDataStruct));
+		Receiver.bViscaStaticDataPushed = true;
+	}
 }
 
 void FViscaLiveLinkSource::PushFrame(const FViscaReceiverRuntime& Receiver)
@@ -1095,6 +1144,63 @@ void FViscaLiveLinkSource::PushFrame(const FViscaReceiverRuntime& Receiver)
 	FrameData.FocalLength = Receiver.State.NormalizedZoom;
 	FrameData.FocusDistance = Receiver.State.NormalizedFocus;
 	FrameData.Aperture = Receiver.State.NormalizedIris;
+	Client->PushSubjectFrameData_AnyThread(SubjectKey, MoveTemp(FrameDataStruct));
+
+	PushViscaFrame(Receiver);
+}
+
+void FViscaLiveLinkSource::PushViscaFrame(const FViscaReceiverRuntime& Receiver)
+{
+	if (!Client)
+	{
+		return;
+	}
+
+	const FName ViscaSubjectName = MakeViscaSubjectName(Receiver.SubjectName);
+	const FLiveLinkSubjectKey SubjectKey(SourceGuid, ViscaSubjectName);
+
+	FLiveLinkFrameDataStruct FrameDataStruct(FLiveLinkVISCACameraFrameData::StaticStruct());
+	FLiveLinkVISCACameraFrameData& FrameData = *FrameDataStruct.Cast<FLiveLinkVISCACameraFrameData>();
+	const double WorldSeconds = FApp::GetCurrentTime();
+	FrameData.WorldTime = FLiveLinkWorldTime(WorldSeconds);
+	const FFrameTime SceneFrameTime = ViscaSceneFrameRate.AsFrameTime(WorldSeconds);
+	FrameData.MetaData.SceneTime = FQualifiedFrameTime(SceneFrameTime, ViscaSceneFrameRate);
+	FrameData.MetaData.StringMetaData.Add(TEXT("ViscaSubject"), Receiver.SubjectName.ToString());
+	FrameData.Transform = Receiver.State.CameraTransform;
+	FrameData.FocalLength = Receiver.State.NormalizedZoom;
+	FrameData.FocusDistance = Receiver.State.NormalizedFocus;
+	FrameData.Aperture = Receiver.State.NormalizedIris;
+
+	const FViscaCameraState& State = Receiver.State;
+	FrameData.bPowerOn = State.bPowerOn;
+	FrameData.bMenuOpen = State.bMenuOpen;
+	FrameData.bColorBar = State.bColorBar;
+	FrameData.bAutoFocus = State.bAutoFocus;
+	FrameData.bAutoIris = State.bAutoIris;
+	FrameData.bAgc = State.bAgc;
+	FrameData.bAutoShutter = State.bAutoShutter;
+	FrameData.bBacklightCompensation = State.bBacklightCompensation;
+	FrameData.bSpotlightCompensation = State.bSpotlightCompensation;
+	FrameData.bDetailEnabled = State.bDetailEnabled;
+	FrameData.bKneeEnabled = State.bKneeEnabled;
+	FrameData.bVariableNdMode = State.bVariableNdMode;
+	FrameData.bAutoNd = State.bAutoNd;
+	FrameData.bNdFiltered = State.bNdFiltered;
+	FrameData.bTallyRed = State.bTallyRed;
+	FrameData.bTallyGreen = State.bTallyGreen;
+	FrameData.bRecording = State.bRecording;
+	FrameData.bAudioLevelAuto = State.bAudioLevelAuto;
+	FrameData.NdPreset = State.NdPreset;
+	FrameData.WhiteBalanceMode = State.WhiteBalanceMode;
+	FrameData.KneeMode = State.KneeMode;
+	FrameData.AudioLevelChannel = State.AudioLevelChannel;
+	FrameData.NormalizedNd = State.NormalizedNd;
+	FrameData.NormalizedAeLevel = State.NormalizedAeLevel;
+	FrameData.NormalizedDetailLevel = State.NormalizedDetailLevel;
+	FrameData.NormalizedWhiteTemperature = State.NormalizedWhiteTemperature;
+	FrameData.NormalizedRGain = State.NormalizedRGain;
+	FrameData.NormalizedBGain = State.NormalizedBGain;
+	FrameData.NormalizedAudioInputLevel = State.NormalizedAudioInputLevel;
 	Client->PushSubjectFrameData_AnyThread(SubjectKey, MoveTemp(FrameDataStruct));
 }
 

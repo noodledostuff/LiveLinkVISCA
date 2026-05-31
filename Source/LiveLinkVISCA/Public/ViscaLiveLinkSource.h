@@ -98,6 +98,7 @@ private:
 		bool bListenSocketOk = false;
 		FName SubjectName;
 		bool bStaticDataPushed = false;
+		bool bViscaStaticDataPushed = false;
 		FViscaCameraState State;
 		TMap<uint8, FViscaCameraState> Presets;
 
@@ -118,7 +119,9 @@ private:
 	void PerformShutdownOnce();
 	void RefreshSourceStatus();
 	void EnsureSubject(FViscaReceiverRuntime& Receiver);
+	void EnsureViscaSubject(FViscaReceiverRuntime& Receiver);
 	void PushFrame(const FViscaReceiverRuntime& Receiver);
+	void PushViscaFrame(const FViscaReceiverRuntime& Receiver);
 	void ProcessIncomingPacket(
 		int32 ReceiverIndex,
 		const TArray<uint8>& PacketData,

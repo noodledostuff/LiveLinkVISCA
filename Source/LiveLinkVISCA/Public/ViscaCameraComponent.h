@@ -79,6 +79,10 @@ public:
 
 private:
 	float ApplyRange(float InValue, float InMin, float InMax) const;
+	void ApplyViscaExtendedData(
+		UCameraComponent* CameraComponent,
+		UCineCameraComponent* CineCameraComponent,
+		const struct FLiveLinkVISCACameraFrameData* FrameData) const;
 	void ApplyToCamera(
 		UCameraComponent* CameraComponent,
 		UCineCameraComponent* CineCameraComponent,
