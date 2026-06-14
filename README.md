@@ -12,6 +12,7 @@ The plugin is designed for virtual production, broadcast, previs, and test-contr
 - Configurable IPv4 bind address and one receiver per Live Link subject.
 - UDP listen mode for simple datagram senders.
 - TCP session mode with VISCA-over-IP ACK/completion replies for controllers that wait for responses.
+- Standalone VISCA-over-IP command capture utility for inspecting control panel traffic outside Unreal.
 - Standard Live Link Camera subject for compatibility with existing Camera-role workflows.
 - Additive custom VISCA Camera role subject named `<Subject>_VISCA` with extended VISCA state.
 - Continuous pan, tilt, zoom, and focus drive until a stop/direct/home/reset command is received.
@@ -134,6 +135,28 @@ The zip contains one top-level `LiveLinkVISCA` folder and is intended for GitHub
 5. Enable `Update in Editor` if editor viewport updates are required.
 
 The component automatically looks for the matching custom VISCA subject named `Cam1_VISCA` and applies supported extended camera settings when that subject is available.
+
+---
+
+## VISCA Command Capture Utility
+
+The plugin includes a standalone command capture utility at:
+
+```text
+Tools/ViscaIpCapture/
+```
+
+Use it when validating a control panel, checking whether commands are reaching the machine, or identifying the exact VISCA bytes a panel sends before configuring the Live Link source.
+
+Run on Windows:
+
+```bat
+Tools\ViscaIpCapture\Run_VISCA_Capture.bat
+```
+
+The utility listens on `52381` by default, supports `UDP`, `TCP`, and `Both`, decodes common VISCA commands, displays raw packet hex, and exports captures to CSV or JSONL. Enable `Send ACK/completion replies` when testing TCP panels or any panel that waits for camera responses.
+
+Only one process can bind the same protocol and port. Stop the Unreal Live Link VISCA source or choose another port while the capture utility is running.
 
 ---
 
@@ -317,6 +340,7 @@ Each receiver must bind a unique port on the selected bind address.
 | No movement | Confirm the VISCA sender is targeting this machine and port. Confirm `Evaluate Live Link` is enabled. |
 | No editor viewport update | Enable `Update in Editor` on the component. |
 | TCP controller does not connect | Confirm only one client is using the receiver port and the port is not blocked. |
+| Need to verify panel output | Run `Tools\ViscaIpCapture\Run_VISCA_Capture.bat` and point the panel at this machine and port. |
 | Existing Camera-role tooling ignores extended state | Use the `<Subject>_VISCA` custom role subject or read metadata keys from the standard subject. |
 | Extended settings do not exactly match hardware | Some VISCA fields are approximated because Unreal Cine Camera/PostProcess has different controls than physical cameras. |
 

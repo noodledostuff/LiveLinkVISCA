@@ -18,6 +18,10 @@ Dist/
 # Prerequisites
 *.d
 
+# Python utility caches
+__pycache__/
+*.pyc
+
 # Compiled object files
 *.slo
 *.lo
