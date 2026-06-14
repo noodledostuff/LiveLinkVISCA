@@ -40,9 +40,9 @@ namespace
 	/** High-res zoom max magnitude (normalized zoom / sec). */
 	constexpr float ZoomHighResVelocityScale = 0.65f;
 	/** Standard focus far/near sustained rate (normalized focus / sec). */
-	constexpr float FocusStandardVelocity = 0.35f;
+	constexpr float FocusStandardVelocity = 0.08f;
 	/** Variable focus: scales (speedNibble+1)/8 to normalized focus / sec. */
-	constexpr float FocusVariableVelocityScale = 0.45f;
+	constexpr float FocusVariableVelocityScale = 0.12f;
 
 	int32 ParsePortString(const FString& PortString)
 	{
@@ -1599,6 +1599,7 @@ void FViscaLiveLinkSource::ApplyViscaCommandToState(FViscaReceiverRuntime& InOut
 		if (FocusMode == 0x02)
 		{
 			InOutState.bAutoFocus = true;
+			InOutState.FocusAxisVelocity = 0.0f;
 		}
 		else if (FocusMode == 0x03)
 		{
@@ -1607,6 +1608,10 @@ void FViscaLiveLinkSource::ApplyViscaCommandToState(FViscaReceiverRuntime& InOut
 		else if (FocusMode == 0x10)
 		{
 			InOutState.bAutoFocus = !InOutState.bAutoFocus;
+			if (InOutState.bAutoFocus)
+			{
+				InOutState.FocusAxisVelocity = 0.0f;
+			}
 		}
 	}
 	else if (Category == 0x7E && Command == 0x04 && CommandPayload.Num() >= 9 && CommandPayload[4] == 0x4B)

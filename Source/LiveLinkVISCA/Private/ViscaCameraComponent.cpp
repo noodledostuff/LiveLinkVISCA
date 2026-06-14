@@ -15,6 +15,12 @@
 #include "UObject/UnrealType.h"
 #endif
 
+namespace
+{
+	constexpr float ViscaExposureCompensationMin = -7.0f;
+	constexpr float ViscaExposureCompensationMax = 7.0f;
+}
+
 UViscaCameraComponent::UViscaCameraComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -71,9 +77,12 @@ void UViscaCameraComponent::ApplyViscaExtendedData(
 
 	FPostProcessSettings& PostProcessSettings = CameraComponent->PostProcessSettings;
 	PostProcessSettings.bOverride_AutoExposureMethod = true;
-	PostProcessSettings.AutoExposureMethod = FrameData->bAutoShutter ? AEM_Histogram : AEM_Manual;
+	PostProcessSettings.AutoExposureMethod = AEM_Histogram;
 	PostProcessSettings.bOverride_AutoExposureBias = true;
-	PostProcessSettings.AutoExposureBias = FMath::Lerp(-3.0f, 3.0f, FMath::Clamp(FrameData->NormalizedAeLevel, 0.0f, 1.0f));
+	PostProcessSettings.AutoExposureBias = FMath::Lerp(
+		ViscaExposureCompensationMin,
+		ViscaExposureCompensationMax,
+		FMath::Clamp(FrameData->NormalizedAeLevel, 0.0f, 1.0f));
 
 	PostProcessSettings.bOverride_TemperatureType = true;
 	PostProcessSettings.TemperatureType = TEMP_WhiteBalance;
@@ -82,23 +91,25 @@ void UViscaCameraComponent::ApplyViscaExtendedData(
 	PostProcessSettings.bOverride_WhiteTint = true;
 	PostProcessSettings.WhiteTint = FMath::Clamp((FrameData->NormalizedRGain - FrameData->NormalizedBGain) * 2.0f, -1.0f, 1.0f);
 
-	PostProcessSettings.bOverride_AutoExposureApplyPhysicalCameraExposure = true;
-	PostProcessSettings.AutoExposureApplyPhysicalCameraExposure = !FrameData->bAutoShutter;
-	PostProcessSettings.bOverride_CameraShutterSpeed = true;
-	PostProcessSettings.CameraShutterSpeed = FrameData->bAutoShutter
-		? 60.0f
-		: FMath::Lerp(24.0f, 250.0f, FMath::Clamp(FrameData->NormalizedAeLevel, 0.0f, 1.0f));
-	PostProcessSettings.bOverride_CameraISO = true;
-	PostProcessSettings.CameraISO = FrameData->bAgc
-		? 800.0f
-		: FMath::Lerp(100.0f, 3200.0f, FMath::Clamp(FrameData->NormalizedAeLevel, 0.0f, 1.0f));
-
 	if (CineCameraComponent)
 	{
 		CineCameraComponent->CurrentAperture = ApplyRange(
 			FrameData->Aperture,
 			CineCameraComponent->LensSettings.MinFStop,
 			CineCameraComponent->LensSettings.MaxFStop);
+
+		if (FrameData->bAutoFocus)
+		{
+			CineCameraComponent->FocusSettings.FocusMethod = ECameraFocusMethod::Disable;
+		}
+		else
+		{
+			CineCameraComponent->FocusSettings.FocusMethod = ECameraFocusMethod::Manual;
+			CineCameraComponent->FocusSettings.ManualFocusDistance = ApplyRange(
+				FrameData->FocusDistance,
+				CineCameraComponent->LensSettings.MinimumFocusDistance,
+				100000.0f);
+		}
 	}
 }
 
