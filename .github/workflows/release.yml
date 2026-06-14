@@ -6,24 +6,24 @@ on:
     branches:
       - main
     paths:
-      - LiveLinkVISCA.uplugin
-      - Source/**
-      - Config/**
-      - Content/**
-      - Resources/**
-      - README.md
-      - LICENSE.md
-      - CHANGELOG.md
-      - RELEASE_CHECKLIST.md
-      - BuildPlugin.bat
-      - PackagePlugin.bat
-      - .github/workflows/release.yml
+      - "LiveLinkVISCA.uplugin"
+      - "Source/**"
+      - "Config/**"
+      - "Content/**"
+      - "Resources/**"
+      - "README.md"
+      - "LICENSE.md"
+      - "CHANGELOG.md"
+      - "RELEASE_CHECKLIST.md"
+      - "BuildPlugin.bat"
+      - "PackagePlugin.bat"
+      - ".github/workflows/release.yml"
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: "release-${{ github.ref }}"
   cancel-in-progress: false
 
 jobs:
