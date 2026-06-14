@@ -45,6 +45,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
+          $PSNativeCommandUseErrorActionPreference = $false
           git fetch --tags --force
 
           $ExistingTag = git ls-remote --tags origin "refs/tags/$env:RELEASE_TAG"
