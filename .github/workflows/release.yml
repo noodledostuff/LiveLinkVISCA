@@ -1,0 +1,162 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - LiveLinkVISCA.uplugin
+      - Source/**
+      - Config/**
+      - Content/**
+      - Resources/**
+      - README.md
+      - LICENSE.md
+      - CHANGELOG.md
+      - RELEASE_CHECKLIST.md
+      - BuildPlugin.bat
+      - PackagePlugin.bat
+      - .github/workflows/release.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Create Versioned Plugin Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read plugin version
+        id: version
+        shell: pwsh
+        run: |
+          $Plugin = Get-Content -Raw -Path "LiveLinkVISCA.uplugin" | ConvertFrom-Json
+          $VersionName = [string]$Plugin.VersionName
+          if ([string]::IsNullOrWhiteSpace($VersionName)) {
+            throw "LiveLinkVISCA.uplugin does not define VersionName."
+          }
+
+          $VersionName = $VersionName.Trim()
+          if ($VersionName -notmatch '^\d+\.\d+\.\d+([-.+][0-9A-Za-z.-]+)?$') {
+            throw "VersionName '$VersionName' is not valid release version text. Use a SemVer-like value such as 1.0.0."
+          }
+
+          "version=$VersionName" >> $env:GITHUB_OUTPUT
+          "tag=v$VersionName" >> $env:GITHUB_OUTPUT
+          "zip_name=LiveLinkVISCA-$VersionName.zip" >> $env:GITHUB_OUTPUT
+
+      - name: Stop if this version already exists
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          git fetch --tags --force
+
+          $ExistingTag = git ls-remote --tags origin "refs/tags/$env:RELEASE_TAG"
+          if (-not [string]::IsNullOrWhiteSpace($ExistingTag)) {
+            throw "Release tag $env:RELEASE_TAG already exists. Bump VersionName in LiveLinkVISCA.uplugin before creating another release."
+          }
+
+          gh release view "$env:RELEASE_TAG" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            throw "GitHub release $env:RELEASE_TAG already exists. Bump VersionName in LiveLinkVISCA.uplugin before creating another release."
+          }
+
+      - name: Build clean plugin zip
+        id: package
+        shell: pwsh
+        run: |
+          $StageRoot = Join-Path $env:RUNNER_TEMP "LiveLinkVISCA-release"
+          $PluginStage = Join-Path $StageRoot "LiveLinkVISCA"
+          $ZipPath = Join-Path $env:RUNNER_TEMP "${{ steps.version.outputs.zip_name }}"
+
+          if (Test-Path $StageRoot) {
+            Remove-Item -LiteralPath $StageRoot -Recurse -Force
+          }
+          if (Test-Path $ZipPath) {
+            Remove-Item -LiteralPath $ZipPath -Force
+          }
+
+          New-Item -ItemType Directory -Path $PluginStage -Force | Out-Null
+
+          $Items = @(
+            "LiveLinkVISCA.uplugin",
+            "README.md",
+            "LICENSE.md",
+            "CHANGELOG.md",
+            "RELEASE_CHECKLIST.md",
+            "BuildPlugin.bat",
+            "PackagePlugin.bat",
+            "Config",
+            "Content",
+            "Resources",
+            "Source"
+          )
+
+          foreach ($Item in $Items) {
+            if (-not (Test-Path -LiteralPath $Item)) {
+              throw "Required release item is missing: $Item"
+            }
+
+            Copy-Item -LiteralPath $Item -Destination $PluginStage -Recurse -Force
+          }
+
+          $Forbidden = @("Binaries", "Intermediate", "Saved", "Releases", ".git", ".github", ".vs")
+          foreach ($Name in $Forbidden) {
+            if (Test-Path -LiteralPath (Join-Path $PluginStage $Name)) {
+              throw "Release package unexpectedly contains generated or repository-only directory: $Name"
+            }
+          }
+
+          Compress-Archive -Path $PluginStage -DestinationPath $ZipPath -Force
+
+          "zip_path=$ZipPath" >> $env:GITHUB_OUTPUT
+
+      - name: Create release notes
+        shell: pwsh
+        run: |
+          $Version = "${{ steps.version.outputs.version }}"
+          $Changelog = Get-Content -Raw -Path "CHANGELOG.md"
+          $Pattern = "(?ms)^##\s+$([regex]::Escape($Version))\b.*?(?=^##\s+|\z)"
+          $Match = [regex]::Match($Changelog, $Pattern)
+
+          if ($Match.Success) {
+            $Notes = $Match.Value.Trim()
+          } else {
+            $Notes = @"
+## $Version
+
+See CHANGELOG.md for release details.
+"@
+            $Notes = $Notes.Trim()
+          }
+
+          $HeadingPattern = "^##\s+$([regex]::Escape($Version))[^\r\n]*"
+          $HeadingReplacement = "## LiveLinkVISCA v$Version"
+          $Notes = $Notes -replace $HeadingPattern, $HeadingReplacement
+          Set-Content -Path "$env:RUNNER_TEMP\release-notes.md" -Value $Notes -Encoding UTF8
+
+      - name: Create GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_TITLE: LiveLinkVISCA ${{ steps.version.outputs.tag }}
+          ZIP_PATH: ${{ steps.package.outputs.zip_path }}
+        run: |
+          gh release create "$env:RELEASE_TAG" "$env:ZIP_PATH" `
+            --target "$env:GITHUB_SHA" `
+            --title "$env:RELEASE_TITLE" `
+            --notes-file "$env:RUNNER_TEMP\release-notes.md"

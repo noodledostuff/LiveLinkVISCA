@@ -43,9 +43,16 @@ PackagePlugin.bat Win64
   - `Intermediate/`
   - `Saved/`
   - `.vs/`
-- Publish the source checkout without local project artifacts.
-- Attach `Releases/LiveLinkVISCA.zip` if you want users to download a packaged build.
-- Include version notes from `CHANGELOG.md`.
+- Push to `main`. The `Release` GitHub Actions workflow reads
+  `VersionName` from `LiveLinkVISCA.uplugin`, creates tag `vX.Y.Z`, builds
+  `LiveLinkVISCA-X.Y.Z.zip`, and publishes it as a GitHub Release asset.
+- If the release tag already exists, bump `VersionName` before pushing another
+  release.
+- The workflow zip is a clean source plugin package. Use `PackagePlugin.bat`
+  locally or on a self-hosted Unreal runner when you need a UAT-built package
+  with compiled platform binaries.
+- Include version notes in `CHANGELOG.md`; the workflow uses the matching
+  `## X.Y.Z` section as release notes.
 
 ## Fab Submission
 
