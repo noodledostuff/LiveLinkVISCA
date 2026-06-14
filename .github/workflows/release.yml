@@ -58,6 +58,8 @@ jobs:
             throw "GitHub release $env:RELEASE_TAG already exists. Bump VersionName in LiveLinkVISCA.uplugin before creating another release."
           }
 
+          $global:LASTEXITCODE = 0
+
       - name: Build clean plugin zip
         id: package
         shell: pwsh
