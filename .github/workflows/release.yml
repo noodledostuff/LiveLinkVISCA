@@ -5,19 +5,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - "LiveLinkVISCA.uplugin"
-      - "Source/**"
-      - "Config/**"
-      - "Content/**"
-      - "Resources/**"
-      - "README.md"
-      - "LICENSE.md"
-      - "CHANGELOG.md"
-      - "RELEASE_CHECKLIST.md"
-      - "BuildPlugin.bat"
-      - "PackagePlugin.bat"
-      - ".github/workflows/release.yml"
 
 permissions:
   contents: write
