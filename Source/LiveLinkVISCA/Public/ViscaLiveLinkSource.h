@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "HAL/CriticalSection.h"
 #include "HAL/Runnable.h"
+#include "HAL/ThreadSafeCounter.h"
 #include "HAL/ThreadSafeBool.h"
 #include "ILiveLinkSource.h"
 #include "Interfaces/IPv4/IPv4Address.h"
@@ -16,7 +17,10 @@ class ISocketSubsystem;
 class ULiveLinkSourceSettings;
 struct FPropertyChangedEvent;
 
-class LIVELINKVISCA_API FViscaLiveLinkSource : public ILiveLinkSource, public FRunnable
+class LIVELINKVISCA_API FViscaLiveLinkSource
+	: public ILiveLinkSource
+	, public FRunnable
+	, public TSharedFromThis<FViscaLiveLinkSource, ESPMode::ThreadSafe>
 {
 public:
 	explicit FViscaLiveLinkSource(const FViscaLiveLinkConnectionSettings& InSettings);
@@ -39,6 +43,8 @@ public:
 	virtual uint32 Run() override;
 	virtual void Stop() override;
 	virtual void Exit() override {}
+
+	void Start();
 
 private:
 	struct FViscaCameraState
@@ -110,7 +116,6 @@ private:
 	};
 
 private:
-	void Start();
 	void RestartWithSettings(const FViscaLiveLinkConnectionSettings& InSettings);
 	void RebuildSockets();
 	void ShutdownSockets();
@@ -123,6 +128,7 @@ private:
 	void PushFrame(const FViscaReceiverRuntime& Receiver);
 	void PushViscaFrame(const FViscaReceiverRuntime& Receiver);
 	void ProcessIncomingPacket(
+		int32 ReceiverRevisionAtDispatch,
 		int32 ReceiverIndex,
 		const TArray<uint8>& PacketData,
 		const FIPv4Endpoint& SenderEndpoint,
@@ -157,6 +163,7 @@ private:
 	TArray<FName> CreatedSubjects;
 	mutable FCriticalSection SubjectsLock;
 	mutable FCriticalSection ShutdownMutex;
+	FThreadSafeCounter ReceiverRevision;
 	bool bHasPerformedShutdown = false;
 
 	ISocketSubsystem* SocketSubsystem = nullptr;

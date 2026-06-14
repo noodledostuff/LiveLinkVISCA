@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright (c) 2026 Timothy YU. All rights reserved.
 
 using UnrealBuildTool;
 

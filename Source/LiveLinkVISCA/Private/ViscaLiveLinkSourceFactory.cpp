@@ -18,7 +18,9 @@ FText UViscaLiveLinkSourceFactory::GetSourceTooltip() const
 TSharedPtr<ILiveLinkSource> UViscaLiveLinkSourceFactory::CreateSource(const FString& ConnectionString) const
 {
 	const FViscaLiveLinkConnectionSettings Settings = FViscaLiveLinkConnectionSettings::FromString(ConnectionString);
-	return MakeShared<FViscaLiveLinkSource>(Settings);
+	TSharedRef<FViscaLiveLinkSource, ESPMode::ThreadSafe> Source = MakeShared<FViscaLiveLinkSource, ESPMode::ThreadSafe>(Settings);
+	Source->Start();
+	return Source;
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -3,7 +3,7 @@ setlocal EnableExtensions
 
 REM ============================================================================
 REM Build LiveLinkVISCA by compiling the host Unreal Editor target.
-REM The plugin is built as part of VISCALivelinkDevEditor (Win64).
+REM The plugin is built as part of the project that contains it.
 REM ============================================================================
 cd /d "%~dp0"
 
@@ -15,6 +15,9 @@ if not defined UE_ROOT (
 	if exist "E:\UE_5.7\Engine\Build\BatchFiles\Build.bat" set "UE_ROOT=E:\UE_5.7"
 )
 if not defined UE_ROOT (
+	if exist "D:\UE_5.7\Engine\Build\BatchFiles\Build.bat" set "UE_ROOT=D:\UE_5.7"
+)
+if not defined UE_ROOT (
 	if exist "%ProgramFiles%\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat" (
 		set "UE_ROOT=%ProgramFiles%\Epic Games\UE_5.7"
 	)
@@ -22,6 +25,7 @@ if not defined UE_ROOT (
 if not defined UE_ROOT (
 	echo ERROR: Unreal Engine not found. Set UE_ROOT to your engine root, for example:
 	echo   set UE_ROOT=E:\UE_5.7
+	echo   set UE_ROOT=D:\UE_5.7
 	echo   set UE_ROOT=C:\Program Files\Epic Games\UE_5.7
 	exit /b 1
 )
@@ -60,10 +64,12 @@ if not defined UPROJECT (
 
 echo Engine:  "%UE_ROOT%"
 echo Project: "%UPROJECT%"
-echo Target:  VISCALivelinkDevEditor Win64 %CONFIG%
+for %%P in ("%UPROJECT%") do set "PROJECT_NAME=%%~nP"
+set "TARGET_NAME=%PROJECT_NAME%Editor"
+echo Target:  %TARGET_NAME% Win64 %CONFIG%
 echo.
 
-call "%BUILD_BAT%" VISCALivelinkDevEditor Win64 %CONFIG% -Project="%UPROJECT%" -WaitMutex
+call "%BUILD_BAT%" %TARGET_NAME% Win64 %CONFIG% -Project="%UPROJECT%" -WaitMutex
 set "ERR=%ERRORLEVEL%"
 if not "%ERR%"=="0" (
 	echo.

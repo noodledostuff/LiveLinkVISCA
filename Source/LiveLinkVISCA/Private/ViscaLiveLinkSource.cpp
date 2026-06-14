@@ -110,8 +110,6 @@ FViscaLiveLinkSource::FViscaLiveLinkSource(const FViscaLiveLinkConnectionSetting
 
 	SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
 	RebuildSockets();
-
-	Start();
 }
 
 FViscaLiveLinkSource::~FViscaLiveLinkSource()
@@ -121,9 +119,19 @@ FViscaLiveLinkSource::~FViscaLiveLinkSource()
 
 void FViscaLiveLinkSource::Start()
 {
+	if (Thread)
+	{
+		return;
+	}
+
 	bIsRunning = true;
 	const FString ThreadName = FString::Printf(TEXT("VISCAReceiver_%d"), FAsyncThreadIndex::GetNext());
 	Thread = FRunnableThread::Create(this, *ThreadName, 0, TPri_AboveNormal);
+	if (!Thread)
+	{
+		bIsRunning = false;
+		RefreshSourceStatus();
+	}
 }
 
 void FViscaLiveLinkSource::RestartWithSettings(const FViscaLiveLinkConnectionSettings& InSettings)
@@ -149,6 +157,7 @@ void FViscaLiveLinkSource::RestartWithSettings(const FViscaLiveLinkConnectionSet
 
 void FViscaLiveLinkSource::RebuildSockets()
 {
+	ReceiverRevision.Increment();
 	ShutdownSockets();
 	Receivers.Empty();
 
@@ -844,6 +853,8 @@ void FViscaLiveLinkSource::Stop()
 
 uint32 FViscaLiveLinkSource::Run()
 {
+	const TWeakPtr<FViscaLiveLinkSource, ESPMode::ThreadSafe> WeakSource = AsShared();
+
 	while (bIsRunning)
 	{
 		for (int32 Index = 0; Index < Receivers.Num(); ++Index)
@@ -960,10 +971,14 @@ uint32 FViscaLiveLinkSource::Run()
 									{
 										if (!bShuttingDown && bIsRunning)
 										{
+											const int32 DispatchRevision = ReceiverRevision.GetValue();
 											AsyncTask(ENamedThreads::GameThread,
-												[this, Index, Chunk = MoveTemp(Chunk), SenderEndpoint, IpSeq, bIpWrap]() mutable
+												[WeakSource, DispatchRevision, Index, Chunk = MoveTemp(Chunk), SenderEndpoint, IpSeq, bIpWrap]() mutable
 												{
-													ProcessIncomingPacket(Index, Chunk, SenderEndpoint, IpSeq, bIpWrap);
+													if (const TSharedPtr<FViscaLiveLinkSource, ESPMode::ThreadSafe> Source = WeakSource.Pin())
+													{
+														Source->ProcessIncomingPacket(DispatchRevision, Index, Chunk, SenderEndpoint, IpSeq, bIpWrap);
+													}
 												});
 										}
 									}
@@ -976,18 +991,26 @@ uint32 FViscaLiveLinkSource::Run()
 								TArray<uint8> Unwrapped;
 								if (TryUnwrapUdpViscaIp(PacketData, Unwrapped, IpSeq, bIpWrap))
 								{
+									const int32 DispatchRevision = ReceiverRevision.GetValue();
 									AsyncTask(ENamedThreads::GameThread,
-										[this, Index, Unwrapped = MoveTemp(Unwrapped), SenderEndpoint, IpSeq, bIpWrap]() mutable
+										[WeakSource, DispatchRevision, Index, Unwrapped = MoveTemp(Unwrapped), SenderEndpoint, IpSeq, bIpWrap]() mutable
 										{
-											ProcessIncomingPacket(Index, Unwrapped, SenderEndpoint, IpSeq, bIpWrap);
+											if (const TSharedPtr<FViscaLiveLinkSource, ESPMode::ThreadSafe> Source = WeakSource.Pin())
+											{
+												Source->ProcessIncomingPacket(DispatchRevision, Index, Unwrapped, SenderEndpoint, IpSeq, bIpWrap);
+											}
 										});
 								}
 								else
 								{
+									const int32 DispatchRevision = ReceiverRevision.GetValue();
 									AsyncTask(ENamedThreads::GameThread,
-										[this, Index, PacketData = MoveTemp(PacketData), SenderEndpoint]() mutable
+										[WeakSource, DispatchRevision, Index, PacketData = MoveTemp(PacketData), SenderEndpoint]() mutable
 										{
-											ProcessIncomingPacket(Index, PacketData, SenderEndpoint, 0, false);
+											if (const TSharedPtr<FViscaLiveLinkSource, ESPMode::ThreadSafe> Source = WeakSource.Pin())
+											{
+												Source->ProcessIncomingPacket(DispatchRevision, Index, PacketData, SenderEndpoint, 0, false);
+											}
 										});
 								}
 							}
@@ -1205,13 +1228,17 @@ void FViscaLiveLinkSource::PushViscaFrame(const FViscaReceiverRuntime& Receiver)
 }
 
 void FViscaLiveLinkSource::ProcessIncomingPacket(
+	int32 ReceiverRevisionAtDispatch,
 	int32 ReceiverIndex,
 	const TArray<uint8>& PacketData,
 	const FIPv4Endpoint& SenderEndpoint,
 	uint32 ViscaIpSequence,
 	bool bViscaIpWrapped)
 {
-	if (bShuttingDown || !Receivers.IsValidIndex(ReceiverIndex) || !Client)
+	if (bShuttingDown
+		|| ReceiverRevisionAtDispatch != ReceiverRevision.GetValue()
+		|| !Receivers.IsValidIndex(ReceiverIndex)
+		|| !Client)
 	{
 		return;
 	}
@@ -1745,6 +1772,11 @@ void FViscaLiveLinkSource::ClearSubjects()
 		Client->RemoveSubject_AnyThread(FLiveLinkSubjectKey(SourceGuid, SubjectName));
 	}
 	CreatedSubjects.Empty();
+	for (FViscaReceiverRuntime& Receiver : Receivers)
+	{
+		Receiver.bStaticDataPushed = false;
+		Receiver.bViscaStaticDataPushed = false;
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
