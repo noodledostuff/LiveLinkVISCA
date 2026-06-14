@@ -119,10 +119,10 @@ jobs:
             $Notes = $Match.Value.Trim()
           } else {
             $Notes = @"
-## $Version
+          ## $Version
 
-See CHANGELOG.md for release details.
-"@
+          See CHANGELOG.md for release details.
+          "@
             $Notes = $Notes.Trim()
           }
 
