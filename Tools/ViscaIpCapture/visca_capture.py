@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Timothy YU. All rights reserved.
+
 """Standalone VISCA-over-IP command capture utility.
 
 This app listens like a VISCA camera endpoint so a hardware/software control

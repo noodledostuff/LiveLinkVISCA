@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Timothy YU. All rights reserved.
+
 #pragma once
 
 #include "Roles/LiveLinkCameraRole.h"

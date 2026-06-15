@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Timothy YU. All rights reserved.
+
 #include "ViscaCameraComponent.h"
 
 #include "Camera/CameraComponent.h"

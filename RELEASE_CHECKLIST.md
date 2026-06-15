@@ -61,8 +61,11 @@ PackagePlugin.bat Win64
   - `LiveLinkVISCA.uplugin`
   - `Source/`
   - `Config/`
-  - `Content/`
   - `Resources/`
+- Confirm the plugin folder does not contain:
+  - `LICENSE.md`
+  - Empty or unused folders such as `Content/`
+  - Executable or script files such as `.exe`, `.bat`, `.cmd`, `.ps1`, `.sh`, or `.py`
 - Keep generated development folders out of the archive unless Unreal
   AutomationTool intentionally generated platform binaries for the package.
 - Provide the public download link in the Project File Link field.

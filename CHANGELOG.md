@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 - 2026-06-15
+
+- Added Unreal Engine 5.7 and Win64 platform metadata to the plugin descriptor for Fab review.
+- Removed Fab-conflicting distributable license/content placeholders from the product package.
+- Excluded executable and script files from the GitHub release archive.
+- Added publisher/year copyright headers to source and development script files.
+
 ## 1.0.1 - 2026-06-14
 
 - Kept VISCA exposure compensation isolated from post-process ISO and shutter settings.

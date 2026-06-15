@@ -1,7 +1,8 @@
 {
 	"FileVersion": 3,
-	"Version": 101,
-	"VersionName": "1.0.1",
+	"EngineVersion": "5.7.0",
+	"Version": 102,
+	"VersionName": "1.0.2",
 	"FriendlyName": "Live Link VISCA",
 	"Description": "Live Link source and camera driver for VISCA over IP. Receives PTZ, lens, exposure, tally, and extended camera state from VISCA controllers.",
 	"Category": "Virtual Production",
@@ -11,6 +12,9 @@
 	"MarketplaceURL": "",
 	"SupportURL": "https://github.com/noodledostuff/LiveLinkVISCA/issues",
 	"CanContainContent": false,
+	"SupportedTargetPlatforms": [
+		"Win64"
+	],
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
@@ -19,6 +23,9 @@
 			"Name": "LiveLinkVISCA",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Win64"
+			],
 			"AdditionalDependencies": [
 				"Engine",
 				"LiveLink",

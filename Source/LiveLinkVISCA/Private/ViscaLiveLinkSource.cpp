@@ -1,3 +1,5 @@
+// Copyright (c) 2026 Timothy YU. All rights reserved.
+
 #include "ViscaLiveLinkSource.h"
 
 #include "Async/Async.h"

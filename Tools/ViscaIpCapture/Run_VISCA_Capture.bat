@@ -1,3 +1,4 @@
+@REM Copyright (c) 2026 Timothy YU. All rights reserved.
 @echo off
 setlocal
 cd /d "%~dp0"

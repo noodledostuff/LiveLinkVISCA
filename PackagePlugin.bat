@@ -1,3 +1,4 @@
+@REM Copyright (c) 2026 Timothy YU. All rights reserved.
 @echo off
 setlocal EnableExtensions
 
@@ -61,6 +62,13 @@ if not "%ERR%"=="0" (
 
 if exist "%PACKAGE_DIR%\Intermediate" rmdir /s /q "%PACKAGE_DIR%\Intermediate"
 if exist "%ZIP_FILE%" del /q "%ZIP_FILE%"
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$Exts = @('.exe', '.bat', '.cmd', '.ps1', '.psm1', '.sh', '.bash', '.py'); Get-ChildItem -LiteralPath '%PACKAGE_DIR%' -Recurse -File | Where-Object { $Exts -contains $_.Extension.ToLowerInvariant() } | Remove-Item -Force"
+if errorlevel 1 (
+	echo.
+	echo Executable/script cleanup failed.
+	exit /b 1
+)
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Compress-Archive -Path '%PACKAGE_DIR%' -DestinationPath '%ZIP_FILE%' -Force"
 if errorlevel 1 (

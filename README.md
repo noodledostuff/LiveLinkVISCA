@@ -29,7 +29,7 @@ The plugin is designed for virtual production, broadcast, previs, and test-contr
   - Live Link
   - Live Link Camera
 
-The included scripts look for UE 5.7 by default. Set `UE_ROOT` when using another installed engine path.
+The repository build scripts look for UE 5.7 by default. Set `UE_ROOT` when using another installed engine path.
 
 ---
 
@@ -60,7 +60,7 @@ The plugin is compiled with your project editor target. It is not a standalone e
 
 ### BuildPlugin.bat
 
-The included `BuildPlugin.bat` expects this layout:
+When working from a source checkout, `BuildPlugin.bat` expects this layout:
 
 ```text
 YourProject/
@@ -95,7 +95,7 @@ Plugins\LiveLinkVISCA\BuildPlugin.bat
 
 ### PackagePlugin.bat
 
-Use `PackagePlugin.bat` to create a release archive with Unreal AutomationTool:
+When working from a source checkout, use `PackagePlugin.bat` to create a release archive with Unreal AutomationTool:
 
 ```bat
 cd Plugins\LiveLinkVISCA
@@ -108,7 +108,7 @@ The script runs `RunUAT BuildPlugin` and writes:
 Plugins/LiveLinkVISCA/Releases/LiveLinkVISCA.zip
 ```
 
-The zip contains one top-level `LiveLinkVISCA` folder and is intended for GitHub release assets and Fab project file hosting.
+The zip contains one top-level `LiveLinkVISCA` folder. Marketplace-facing release archives omit executable and script files.
 
 ---
 
@@ -140,7 +140,7 @@ The component automatically looks for the matching custom VISCA subject named `C
 
 ## VISCA Command Capture Utility
 
-The plugin includes a standalone command capture utility at:
+The source repository includes a standalone command capture utility at:
 
 ```text
 Tools/ViscaIpCapture/
@@ -340,7 +340,7 @@ Each receiver must bind a unique port on the selected bind address.
 | No movement | Confirm the VISCA sender is targeting this machine and port. Confirm `Evaluate Live Link` is enabled. |
 | No editor viewport update | Enable `Update in Editor` on the component. |
 | TCP controller does not connect | Confirm only one client is using the receiver port and the port is not blocked. |
-| Need to verify panel output | Run `Tools\ViscaIpCapture\Run_VISCA_Capture.bat` and point the panel at this machine and port. |
+| Need to verify panel output | From a source checkout, run `Tools\ViscaIpCapture\Run_VISCA_Capture.bat` and point the panel at this machine and port. |
 | Existing Camera-role tooling ignores extended state | Use the `<Subject>_VISCA` custom role subject or read metadata keys from the standard subject. |
 | Extended settings do not exactly match hardware | Some VISCA fields are approximated because Unreal Cine Camera/PostProcess has different controls than physical cameras. |
 
@@ -364,6 +364,6 @@ Timothy YU - [noodledostuff.com](https://www.noodledostuff.com)
 
 ## License
 
-Copyright (c) 2026 Timothy YU. All rights reserved. See [LICENSE.md](LICENSE.md).
+Copyright (c) 2026 Timothy YU. All rights reserved.
 
 Fab purchases and downloads are also governed by the applicable Fab license and marketplace terms.

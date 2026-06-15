@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Timothy YU. All rights reserved.
+
 name: Release
 
 on: [push, workflow_dispatch]
@@ -80,13 +82,8 @@ jobs:
           $Items = @(
             "LiveLinkVISCA.uplugin",
             "README.md",
-            "LICENSE.md",
             "CHANGELOG.md",
-            "RELEASE_CHECKLIST.md",
-            "BuildPlugin.bat",
-            "PackagePlugin.bat",
             "Config",
-            "Content",
             "Resources",
             "Source"
           )
@@ -104,6 +101,15 @@ jobs:
             if (Test-Path -LiteralPath (Join-Path $PluginStage $Name)) {
               throw "Release package unexpectedly contains generated or repository-only directory: $Name"
             }
+          }
+
+          $ForbiddenExtensions = @(".exe", ".bat", ".cmd", ".ps1", ".psm1", ".sh", ".bash", ".py")
+          $ForbiddenFiles = Get-ChildItem -LiteralPath $PluginStage -Recurse -File |
+            Where-Object { $ForbiddenExtensions -contains $_.Extension.ToLowerInvariant() }
+
+          if ($ForbiddenFiles) {
+            $FileList = ($ForbiddenFiles | ForEach-Object { $_.FullName.Substring($PluginStage.Length + 1) }) -join "`n"
+            throw "Release package contains executable or script files:`n$FileList"
           }
 
           Compress-Archive -Path $PluginStage -DestinationPath $ZipPath -Force

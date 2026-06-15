@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Timothy YU. All rights reserved.
+
 import unittest
 from pathlib import Path
 import sys
