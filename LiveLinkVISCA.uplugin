@@ -1,8 +1,8 @@
 {
 	"FileVersion": 3,
-	"EngineVersion": "5.7.0",
-	"Version": 102,
-	"VersionName": "1.0.2",
+	"EngineVersion": "5.8.0",
+	"Version": 103,
+	"VersionName": "1.0.3",
 	"FriendlyName": "Live Link VISCA",
 	"Description": "Live Link source and camera driver for VISCA over IP. Receives PTZ, lens, exposure, tally, and extended camera state from VISCA controllers.",
 	"Category": "Virtual Production",

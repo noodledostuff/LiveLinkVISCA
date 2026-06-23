@@ -86,7 +86,7 @@ Short description:
 Technical details:
 
 - Unreal Engine 5.x code plugin.
-- Developed and tested with Unreal Engine 5.7.
+- Targets Unreal Engine 5.8.
 - Requires the built-in Live Link and Live Link Camera plugins.
 - Network modes: UDP listen and TCP session with ACK/completion replies.
 - Primary classes:

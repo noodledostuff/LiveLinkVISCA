@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 - 2026-06-23
+
+- Updated plugin metadata for Unreal Engine 5.8.
+- Switched local build and packaging script defaults to UE 5.8 install paths.
+- Updated release documentation to identify UE 5.8 as the target engine version.
+
 ## 1.0.2 - 2026-06-15
 
 - Added Unreal Engine 5.7 and Win64 platform metadata to the plugin descriptor for Fab review.

@@ -11,23 +11,23 @@ cd /d "%~dp0"
 set "CONFIG=%~1"
 if "%CONFIG%"=="" set "CONFIG=Development"
 
-REM --- Unreal Engine install (folder that CONTAINS "Engine", e.g. UE_5.7) ---
+REM --- Unreal Engine install (folder that CONTAINS "Engine", e.g. UE_5.8) ---
 if not defined UE_ROOT (
-	if exist "E:\UE_5.7\Engine\Build\BatchFiles\Build.bat" set "UE_ROOT=E:\UE_5.7"
+	if exist "E:\UE_5.8\Engine\Build\BatchFiles\Build.bat" set "UE_ROOT=E:\UE_5.8"
 )
 if not defined UE_ROOT (
-	if exist "D:\UE_5.7\Engine\Build\BatchFiles\Build.bat" set "UE_ROOT=D:\UE_5.7"
+	if exist "D:\UE_5.8\Engine\Build\BatchFiles\Build.bat" set "UE_ROOT=D:\UE_5.8"
 )
 if not defined UE_ROOT (
-	if exist "%ProgramFiles%\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat" (
-		set "UE_ROOT=%ProgramFiles%\Epic Games\UE_5.7"
+	if exist "%ProgramFiles%\Epic Games\UE_5.8\Engine\Build\BatchFiles\Build.bat" (
+		set "UE_ROOT=%ProgramFiles%\Epic Games\UE_5.8"
 	)
 )
 if not defined UE_ROOT (
 	echo ERROR: Unreal Engine not found. Set UE_ROOT to your engine root, for example:
-	echo   set UE_ROOT=E:\UE_5.7
-	echo   set UE_ROOT=D:\UE_5.7
-	echo   set UE_ROOT=C:\Program Files\Epic Games\UE_5.7
+	echo   set UE_ROOT=E:\UE_5.8
+	echo   set UE_ROOT=D:\UE_5.8
+	echo   set UE_ROOT=C:\Program Files\Epic Games\UE_5.8
 	exit /b 1
 )
 

@@ -24,12 +24,12 @@ The plugin is designed for virtual production, broadcast, previs, and test-contr
 ## Requirements
 
 - Unreal Engine 5.x.
-- Developed and tested against Unreal Engine 5.7.
+- Targets Unreal Engine 5.8.
 - Required plugins:
   - Live Link
   - Live Link Camera
 
-The repository build scripts look for UE 5.7 by default. Set `UE_ROOT` when using another installed engine path.
+The repository build scripts look for UE 5.8 by default. Set `UE_ROOT` when using another installed engine path.
 
 ---
 
@@ -55,7 +55,7 @@ The plugin is compiled with your project editor target. It is not a standalone e
 
 - Windows.
 - Visual Studio 2022 with the C++ toolchain required by your Unreal version.
-- A full Unreal Engine 5.7 install.
+- A full Unreal Engine 5.8 install.
 - A C++ Unreal project that includes this plugin.
 
 ### BuildPlugin.bat
@@ -82,13 +82,13 @@ Optional inputs:
 | Input | Description |
 | --- | --- |
 | `BuildPlugin.bat Shipping` | Builds another configuration instead of the default `Development`. |
-| `UE_ROOT` | Engine root folder. If unset, the script checks `E:\UE_5.7`, `D:\UE_5.7`, and `%ProgramFiles%\Epic Games\UE_5.7`. |
+| `UE_ROOT` | Engine root folder. If unset, the script checks `E:\UE_5.8`, `D:\UE_5.8`, and `%ProgramFiles%\Epic Games\UE_5.8`. |
 | `VISCA_UPROJECT` | Full path to the host `.uproject` when the plugin is not under `Project/Plugins/LiveLinkVISCA`. |
 
 Example:
 
 ```bat
-set UE_ROOT=C:\Program Files\Epic Games\UE_5.7
+set UE_ROOT=C:\Program Files\Epic Games\UE_5.8
 set VISCA_UPROJECT=D:\Work\MyGame\MyGame.uproject
 Plugins\LiveLinkVISCA\BuildPlugin.bat
 ```
